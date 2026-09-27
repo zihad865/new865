@@ -1,2 +1,4 @@
 build/
 keystore/
+tools/*.jar
+tools/aapt2
