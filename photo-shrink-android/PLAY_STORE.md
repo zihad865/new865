@@ -21,11 +21,12 @@ keeping the highest quality that fits.
 
 • Any resolution: 1000×1000, 300×300 passport, 300×80 signature, or your own
 • Any size limit: 100 KB, 60 KB, 20 KB, 10 KB, whatever the form asks for
-• Lock your settings: tick once and every photo converts to the same pixels & KB automatically
-• Smart quality: finds the best quality under your limit, never bigger than you set
-• Strict mode: keep exact pixels, never shrink the resolution
+• Lock Settings: turn on once and every photo converts to the same pixels & KB automatically
+• Smart quality: finds the best quality under your limit and shows a quality grade
+• Never Reduce Pixels: keep the exact resolution you asked for
 • JPG or WEBP output
 • Save to Gallery or share straight to WhatsApp, email, or upload forms
+• Clean, simple design with light and dark mode
 • Works offline, no ads, no tracking, no permissions
 
 Perfect for job applications, admission forms, passport and visa photos, and online uploads.
