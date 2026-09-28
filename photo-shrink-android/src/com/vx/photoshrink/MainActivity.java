@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.ClipData;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
@@ -11,45 +12,39 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.graphics.Typeface;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.GradientDrawable;
-import android.graphics.drawable.RippleDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.provider.OpenableColumns;
-import android.text.InputType;
 import android.text.TextUtils;
 import android.util.Log;
-import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowInsets;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
-import android.widget.HorizontalScrollView;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
-import android.widget.RadioButton;
-import android.widget.RadioGroup;
 import android.widget.ScrollView;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Locale;
 
 public class MainActivity extends Activity {
@@ -58,73 +53,70 @@ public class MainActivity extends Activity {
     private static final int REQ_PICK = 1;
     private static final int REQ_SAVE = 2;
     private static final String PREFS = "settings";
-    private static final int PREVIEW_MAX = 1024;
     private static final String GALLERY_DIR = "Pictures/PhotoShrink";
+    private static final int PREVIEW_MAX = 1280;
+    private static final int KEEP_RESULTS = 10;
+    private static final int MAX_STEM = 60;
 
     // View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR (API 26); not present in the API 23 stubs.
     private static final int FLAG_LIGHT_NAV_BAR = 0x00000010;
 
-    private static final int PRIMARY = Color.rgb(79, 70, 229);
-    private static final int PRIMARY_DARK = Color.rgb(67, 56, 202);
-    private static final int ACCENT_END = Color.rgb(6, 182, 212);
-    private static final int SURFACE = Color.rgb(238, 242, 255);
-    private static final int TEXT = Color.rgb(30, 27, 75);
-    private static final int MUTED = Color.rgb(100, 116, 139);
-    private static final int OK = Color.rgb(21, 128, 61);
-    private static final int ERROR = Color.rgb(185, 28, 28);
-
-    // {label, width, height, maxKb, exact}
-    private static final Object[][] PRESETS = {
-            {"1000×1000 · 100KB", 1000, 1000, 100.0, true},
-            {"1000×1000 · 60KB", 1000, 1000, 60.0, true},
-            {"Passport 300×300 · 20KB", 300, 300, 20.0, true},
-            {"Signature 300×80 · 10KB", 300, 80, 10.0, true},
-            {"1080 wide · 100KB", 1080, 0, 100.0, false},
-            {"Original · 100KB", 0, 0, 100.0, false},
-    };
-
+    private Ui ui;
+    private LinearLayout column;
+    private FrameLayout photoFrame;
+    private ImageView preview;
+    private TextView placeholder;
+    private TextView originalValue;
     private EditText widthIn;
     private EditText heightIn;
     private EditText maxKbIn;
-    private EditText minQualityIn;
-    private CheckBox exactBox;
-    private CheckBox strictBox;
-    private CheckBox upscaleBox;
-    private CheckBox lockBox;
-    private RadioButton jpegBtn;
-    private RadioButton webpBtn;
-    private TextView lockSummary;
-    private ImageView preview;
-    private TextView sourceInfo;
-    private TextView status;
-    private Button pickBtn;
+    private Switch keepAspect;
+    private Switch neverReduce;
+    private Switch lockSwitch;
+    private Ui.Segmented format;
+    private TextView lockFooter;
     private Button convertBtn;
+    private LinearLayout progressRow;
+    private TextView progressText;
+    private TextView errorText;
+    private LinearLayout resultHeader;
+    private LinearLayout resultCard;
+    private TextView resultFooter;
+    private TextView dimsValue;
+    private TextView sizeValue;
+    private TextView qualityValue;
+    private LinearLayout actions;
     private Button saveBtn;
     private Button shareBtn;
-    private ProgressBar progress;
-    private LinearLayout header;
-    private LinearLayout body;
-    private final List<View> lockables = new ArrayList<>();
 
     private File sourceFile;
     private String sourceName = "photo";
     private long sourceBytes;
+    private int[] sourceDims;
     private Shrinker.Result result;
     private File resultFile;
+    private Uri pendingUri;
     private volatile boolean destroyed;
     private boolean busy;
     private boolean restoring;
 
+    // ================================================================ lifecycle
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        ui = new Ui(this);
         setupWindow();
         setContentView(buildUi());
         loadPrefs();
-        updateButtons();
+        if (savedInstanceState != null) {
+            restoreState(savedInstanceState);
+        }
+        cleanupSources();
         if (savedInstanceState == null) {
             handleIncoming(getIntent());
         }
+        refresh();
     }
 
     @Override
@@ -139,91 +131,193 @@ public class MainActivity extends Activity {
         super.onDestroy();
     }
 
+    @Override
+    protected void onSaveInstanceState(Bundle out) {
+        super.onSaveInstanceState(out);
+        if (sourceFile != null) {
+            out.putString("srcPath", sourceFile.getPath());
+            out.putString("srcName", sourceName);
+            out.putLong("srcBytes", sourceBytes);
+            out.putIntArray("srcDims", sourceDims);
+        }
+        if (result != null && resultFile != null) {
+            out.putString("resPath", resultFile.getPath());
+            out.putIntArray("resMeta", new int[]{result.width, result.height, result.quality,
+                    result.webp ? 1 : 0, result.requestedWidth, result.requestedHeight});
+        }
+    }
+
+    private void restoreState(Bundle in) {
+        String src = in.getString("srcPath");
+        if (src == null || !new File(src).isFile()) {
+            return;
+        }
+        sourceFile = new File(src);
+        sourceName = in.getString("srcName", "photo");
+        sourceBytes = in.getLong("srcBytes");
+        sourceDims = in.getIntArray("srcDims");
+        showOriginal();
+        String res = in.getString("resPath");
+        int[] m = in.getIntArray("resMeta");
+        if (res != null && m != null && m.length == 6 && new File(res).isFile()) {
+            try {
+                byte[] data = readFile(new File(res));
+                result = new Shrinker.Result(data, m[0], m[1], m[2], m[3] == 1, m[4], m[5]);
+                resultFile = new File(res);
+                showResult();
+            } catch (IOException e) {
+                Log.w(TAG, "could not restore result", e);
+            }
+        }
+        final File f = sourceFile;
+        final File r = resultFile;
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                final Bitmap b = r != null ? decodePreview(r) : decodePreview(f);
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (!destroyed) {
+                            setPreview(b);
+                        }
+                    }
+                });
+            }
+        }).start();
+    }
+
     private void handleIncoming(Intent intent) {
         if (intent != null && Intent.ACTION_SEND.equals(intent.getAction())) {
             Uri uri = intent.getParcelableExtra(Intent.EXTRA_STREAM);
             if (uri != null) {
-                loadSource(uri);
+                requestLoad(uri);
             }
         }
     }
 
-    // ---------------------------------------------------------------- window & layout
+    // ================================================================ window
 
-    /** Draw edge-to-edge on every version (enforced from targetSdk 35) and pad content by the system bar insets. */
+    /** Edge-to-edge on API 23+ (enforced from targetSdk 35); content is padded by system bar insets. */
     private void setupWindow() {
         Window w = getWindow();
-        int flags = View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
-        w.setStatusBarColor(Color.TRANSPARENT);
-        if (Build.VERSION.SDK_INT >= 26) {
-            flags |= View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION | FLAG_LIGHT_NAV_BAR;
-            w.setNavigationBarColor(Color.argb(230, 255, 255, 255));
+        w.getDecorView().setBackgroundColor(ui.background);
+        if (Build.VERSION.SDK_INT >= 23) {
+            int flags = View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
+            w.setStatusBarColor(Color.TRANSPARENT);
+            if (!ui.dark) {
+                flags |= View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
+            }
+            if (Build.VERSION.SDK_INT >= 26) {
+                flags |= View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
+                if (!ui.dark) {
+                    flags |= FLAG_LIGHT_NAV_BAR;
+                }
+                w.setNavigationBarColor(Color.argb(220, Color.red(ui.background),
+                        Color.green(ui.background), Color.blue(ui.background)));
+            }
+            w.getDecorView().setSystemUiVisibility(flags);
+        } else {
+            w.setStatusBarColor(Color.BLACK);
         }
-        w.getDecorView().setSystemUiVisibility(flags);
     }
 
-    private int dp(float v) {
-        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, v, getResources().getDisplayMetrics());
-    }
+    // ================================================================ layout
 
     private View buildUi() {
-        LinearLayout outer = new LinearLayout(this);
-        outer.setOrientation(LinearLayout.VERTICAL);
-        outer.setBackgroundColor(Color.WHITE);
-
-        header = new LinearLayout(this);
-        header.setOrientation(LinearLayout.VERTICAL);
-        header.setBackground(new GradientDrawable(GradientDrawable.Orientation.TL_BR, new int[]{PRIMARY, ACCENT_END}));
-        TextView title = new TextView(this);
-        title.setText("Photo Shrink");
-        title.setTextColor(Color.WHITE);
-        title.setTextSize(TypedValue.COMPLEX_UNIT_SP, 24);
-        title.setTypeface(Typeface.DEFAULT_BOLD);
-        TextView subtitle = new TextView(this);
-        subtitle.setText("Any pixels. Any KB. Best quality that fits.");
-        subtitle.setTextColor(Color.argb(230, 255, 255, 255));
-        subtitle.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
-        header.addView(title);
-        header.addView(subtitle);
-        outer.addView(header, matchWrap());
-
-        ScrollView scroll = new ScrollView(this);
+        final ScrollView scroll = new ScrollView(this);
         scroll.setFillViewport(true);
         scroll.setClipToPadding(false);
-        body = new LinearLayout(this);
-        body.setOrientation(LinearLayout.VERTICAL);
-        scroll.addView(body);
-        outer.addView(scroll, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1));
+        scroll.setBackgroundColor(ui.background);
 
-        buildBody(body);
+        FrameLayout center = new FrameLayout(this);
+        scroll.addView(center);
 
-        outer.setOnApplyWindowInsetsListener(new View.OnApplyWindowInsetsListener() {
+        column = new LinearLayout(this);
+        column.setOrientation(LinearLayout.VERTICAL);
+        float screenDp = getResources().getConfiguration().screenWidthDp;
+        int width = screenDp > 680 ? ui.dp(640) : ViewGroup.LayoutParams.MATCH_PARENT;
+        center.addView(column, new FrameLayout.LayoutParams(width, ViewGroup.LayoutParams.WRAP_CONTENT,
+                Gravity.CENTER_HORIZONTAL));
+
+        buildContent(column);
+
+        scroll.setOnApplyWindowInsetsListener(new View.OnApplyWindowInsetsListener() {
             @Override
             public WindowInsets onApplyWindowInsets(View v, WindowInsets insets) {
-                int l = insets.getSystemWindowInsetLeft();
-                int t = insets.getSystemWindowInsetTop();
-                int r = insets.getSystemWindowInsetRight();
-                int b = insets.getSystemWindowInsetBottom();
-                header.setPadding(dp(20) + l, dp(18) + t, dp(20) + r, dp(18));
-                body.setPadding(dp(16) + l, dp(16), dp(16) + r, dp(24) + b);
+                v.setPadding(insets.getSystemWindowInsetLeft(), insets.getSystemWindowInsetTop(),
+                        insets.getSystemWindowInsetRight(), insets.getSystemWindowInsetBottom());
                 return insets.consumeSystemWindowInsets();
             }
         });
-        header.setPadding(dp(20), dp(18), dp(20), dp(18));
-        body.setPadding(dp(16), dp(16), dp(16), dp(24));
-        return outer;
+        return scroll;
     }
 
-    private void buildBody(LinearLayout root) {
-        // Lock card
-        LinearLayout lockCard = card();
-        lockBox = new CheckBox(this);
-        lockBox.setText("🔒  Lock settings");
-        lockBox.setTextSize(TypedValue.COMPLEX_UNIT_SP, 17);
-        lockBox.setTypeface(Typeface.DEFAULT_BOLD);
-        lockBox.setTextColor(TEXT);
-        lockBox.setButtonTintList(ColorStateList.valueOf(PRIMARY));
-        lockBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+    private void buildContent(LinearLayout root) {
+        root.setPadding(ui.dp(16), ui.dp(12), ui.dp(16), ui.dp(32));
+
+        TextView title = ui.text("Photo Shrink", 34, ui.label, Ui.BOLD);
+        title.setPadding(ui.dp(4), ui.dp(8), 0, 0);
+        root.addView(title);
+
+        // ---- Photo
+        LinearLayout photoCard = ui.section(root, null, null);
+        photoFrame = new FrameLayout(this);
+        photoFrame.setBackground(ui.pressableFill());
+        photoFrame.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                pickImage();
+            }
+        });
+        preview = new ImageView(this);
+        preview.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        preview.setVisibility(View.GONE);
+        photoFrame.addView(preview, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT));
+        placeholder = ui.text("＋\nChoose Photo", 17, ui.blue, Ui.MEDIUM);
+        placeholder.setGravity(Gravity.CENTER);
+        placeholder.setLineSpacing(ui.dp(4), 1f);
+        photoFrame.addView(placeholder, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT));
+        photoCard.addView(photoFrame, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ui.dp(260)));
+        originalValue = ui.text("None", 17, ui.secondary, Ui.REGULAR);
+        TextView change = ui.text("Choose…", 17, ui.blue, Ui.REGULAR);
+        change.setPadding(ui.dp(12), ui.dp(8), ui.dp(4), ui.dp(8));
+        change.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                pickImage();
+            }
+        });
+        LinearLayout origRow = ui.row(photoCard, "Original", originalValue);
+        origRow.addView(change);
+
+        // ---- Size
+        LinearLayout size = ui.section(root, "Size", "Leave width or height empty to scale automatically.");
+        widthIn = ui.numberField("Auto", false);
+        heightIn = ui.numberField("Auto", false);
+        ui.row(size, "Width", ui.valueField(widthIn, "px"));
+        ui.row(size, "Height", ui.valueField(heightIn, "px"));
+        keepAspect = ui.toggle();
+        neverReduce = ui.toggle();
+        ui.row(size, "Keep Aspect Ratio", keepAspect);
+        ui.row(size, "Never Reduce Pixels", neverReduce);
+
+        // ---- File
+        LinearLayout file = ui.section(root, "File", "WEBP looks sharper at the same size. Some upload forms accept JPG only.");
+        maxKbIn = ui.numberField("100", true);
+        ui.row(file, "Max Size", ui.valueField(maxKbIn, "KB"));
+        format = new Ui.Segmented(ui, "JPG", "WEBP");
+        LinearLayout fmtRow = ui.row(file, "Format", null);
+        fmtRow.addView(format.view, new LinearLayout.LayoutParams(ui.dp(150), ViewGroup.LayoutParams.WRAP_CONTENT));
+
+        // ---- Lock
+        LinearLayout lock = ui.section(root, null, "");
+        lockFooter = (TextView) lock.getTag();
+        lockSwitch = ui.toggle();
+        ui.row(lock, "Lock Settings", lockSwitch);
+        lockSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton b, boolean checked) {
                 if (!restoring) {
@@ -231,383 +325,221 @@ public class MainActivity extends Activity {
                 }
             }
         });
-        lockSummary = new TextView(this);
-        lockSummary.setTextColor(MUTED);
-        lockSummary.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
-        lockSummary.setPadding(dp(4), dp(2), 0, 0);
-        lockCard.addView(lockBox);
-        lockCard.addView(lockSummary);
-        root.addView(lockCard, cardParams());
 
-        // Photo
-        pickBtn = primaryButton("Select photo");
-        pickBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                pickImage();
-            }
-        });
-        root.addView(pickBtn, spaced(matchWrap(), 14));
-
-        preview = new ImageView(this);
-        preview.setScaleType(ImageView.ScaleType.FIT_CENTER);
-        preview.setBackground(rounded(SURFACE, dp(14)));
-        preview.setClipToOutline(true);
-        root.addView(preview, spaced(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(240)), 10));
-
-        sourceInfo = new TextView(this);
-        sourceInfo.setText("No photo selected");
-        sourceInfo.setTextColor(MUTED);
-        sourceInfo.setPadding(dp(4), dp(6), 0, dp(4));
-        root.addView(sourceInfo);
-
-        // Presets
-        root.addView(sectionTitle("Presets"));
-        HorizontalScrollView hs = new HorizontalScrollView(this);
-        hs.setHorizontalScrollBarEnabled(false);
-        LinearLayout presetRow = new LinearLayout(this);
-        presetRow.setOrientation(LinearLayout.HORIZONTAL);
-        for (final Object[] p : PRESETS) {
-            Button b = chip((String) p[0]);
-            b.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    applyPreset(p);
-                }
-            });
-            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
-                    ViewGroup.LayoutParams.WRAP_CONTENT, dp(40));
-            lp.rightMargin = dp(8);
-            presetRow.addView(b, lp);
-            lockables.add(b);
-        }
-        hs.addView(presetRow);
-        root.addView(hs);
-
-        // Settings card
-        LinearLayout settings = card();
-        settings.addView(label("Resolution (pixels)"));
-        LinearLayout dims = new LinearLayout(this);
-        dims.setOrientation(LinearLayout.HORIZONTAL);
-        dims.setGravity(Gravity.CENTER_VERTICAL);
-        widthIn = numberField("Width", false);
-        heightIn = numberField("Height", false);
-        TextView x = new TextView(this);
-        x.setText("×");
-        x.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
-        x.setPadding(dp(10), 0, dp(10), 0);
-        dims.addView(widthIn, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1));
-        dims.addView(x);
-        dims.addView(heightIn, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1));
-        settings.addView(dims);
-        settings.addView(hint("Empty = original. Only one filled = keep aspect ratio."));
-
-        exactBox = checkBox("Exact size (fill both, ignore aspect ratio)");
-        strictBox = checkBox("Never reduce pixels to reach the KB limit");
-        upscaleBox = checkBox("Allow enlarging small photos");
-        settings.addView(exactBox);
-        settings.addView(strictBox);
-        settings.addView(upscaleBox);
-
-        settings.addView(spaced(label("Max file size (KB)"), 10));
-        maxKbIn = numberField("e.g. 100", true);
-        settings.addView(maxKbIn, matchWrap());
-
-        settings.addView(spaced(label("Format"), 10));
-        RadioGroup fmt = new RadioGroup(this);
-        fmt.setOrientation(RadioGroup.HORIZONTAL);
-        jpegBtn = radio("JPG (works everywhere)");
-        webpBtn = radio("WEBP (sharper)");
-        fmt.addView(jpegBtn);
-        fmt.addView(webpBtn);
-        settings.addView(fmt);
-
-        settings.addView(spaced(label("Min quality before pixels shrink (1–95)"), 10));
-        minQualityIn = numberField("40", false);
-        settings.addView(minQualityIn, matchWrap());
-        root.addView(settings, cardParams());
-
-        lockables.add(widthIn);
-        lockables.add(heightIn);
-        lockables.add(exactBox);
-        lockables.add(strictBox);
-        lockables.add(upscaleBox);
-        lockables.add(maxKbIn);
-        lockables.add(jpegBtn);
-        lockables.add(webpBtn);
-        lockables.add(minQualityIn);
-
-        // Convert & result
-        convertBtn = primaryButton("Convert");
+        // ---- Convert
+        convertBtn = ui.filledButton("Convert");
         convertBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 convert();
             }
         });
-        root.addView(convertBtn, spaced(matchWrap(), 16));
+        root.addView(convertBtn, ui.margins(ui.matchWrap(), 28, 0));
 
-        progress = new ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal);
-        progress.setIndeterminate(true);
-        progress.setIndeterminateTintList(ColorStateList.valueOf(PRIMARY));
-        progress.setVisibility(View.GONE);
-        root.addView(progress, matchWrap());
+        progressRow = new LinearLayout(this);
+        progressRow.setOrientation(LinearLayout.HORIZONTAL);
+        progressRow.setGravity(Gravity.CENTER);
+        progressRow.setPadding(0, ui.dp(12), 0, 0);
+        ProgressBar spinner = new ProgressBar(this, null, android.R.attr.progressBarStyleSmall);
+        spinner.setIndeterminateTintList(ColorStateList.valueOf(ui.secondary));
+        progressText = ui.text("", 15, ui.secondary, Ui.REGULAR);
+        progressText.setPadding(ui.dp(8), 0, 0, 0);
+        progressRow.addView(spinner);
+        progressRow.addView(progressText);
+        progressRow.setVisibility(View.GONE);
+        root.addView(progressRow, ui.matchWrap());
 
-        status = new TextView(this);
-        status.setPadding(dp(4), dp(8), dp(4), dp(8));
-        status.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
-        root.addView(status);
+        errorText = ui.text("", 15, ui.red, Ui.REGULAR);
+        errorText.setGravity(Gravity.CENTER);
+        errorText.setPadding(ui.dp(16), ui.dp(12), ui.dp(16), 0);
+        errorText.setVisibility(View.GONE);
+        root.addView(errorText, ui.matchWrap());
 
-        LinearLayout actions = new LinearLayout(this);
+        // ---- Result
+        resultHeader = new LinearLayout(this);
+        resultHeader.setOrientation(LinearLayout.VERTICAL);
+        root.addView(resultHeader, ui.matchWrap());
+        resultCard = ui.section(resultHeader, "Result", "");
+        resultFooter = (TextView) resultCard.getTag();
+        dimsValue = ui.text("", 17, ui.secondary, Ui.REGULAR);
+        sizeValue = ui.text("", 17, ui.secondary, Ui.REGULAR);
+        qualityValue = ui.text("", 17, ui.secondary, Ui.REGULAR);
+        ui.row(resultCard, "Dimensions", dimsValue);
+        ui.row(resultCard, "File Size", sizeValue);
+        ui.row(resultCard, "Quality", qualityValue);
+
+        actions = new LinearLayout(this);
         actions.setOrientation(LinearLayout.HORIZONTAL);
-        saveBtn = secondaryButton("Save to Gallery");
+        saveBtn = ui.tintedButton("Save to Gallery");
         saveBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 save();
             }
         });
-        shareBtn = secondaryButton("Share");
+        shareBtn = ui.tintedButton("Share");
         shareBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 share();
             }
         });
-        LinearLayout.LayoutParams a = new LinearLayout.LayoutParams(0, dp(48), 1);
-        a.rightMargin = dp(6);
-        LinearLayout.LayoutParams b = new LinearLayout.LayoutParams(0, dp(48), 1);
-        b.leftMargin = dp(6);
+        LinearLayout.LayoutParams a = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1);
+        a.rightMargin = ui.dp(6);
+        LinearLayout.LayoutParams b = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1);
+        b.leftMargin = ui.dp(6);
         actions.addView(saveBtn, a);
         actions.addView(shareBtn, b);
-        root.addView(actions);
+        resultHeader.addView(actions, ui.margins(ui.matchWrap(), 16, 0));
     }
 
-    // ---------------------------------------------------------------- view helpers
+    // ================================================================ state → views
 
-    private LinearLayout.LayoutParams matchWrap() {
-        return new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-    }
+    private void refresh() {
+        boolean locked = lockSwitch.isChecked();
+        convertBtn.setEnabled(!busy && sourceFile != null);
+        convertBtn.setAlpha(convertBtn.isEnabled() ? 1f : 0.4f);
+        convertBtn.setText(locked && result != null ? "Convert Again" : "Convert");
+        photoFrame.setEnabled(!busy);
+        progressRow.setVisibility(busy ? View.VISIBLE : View.GONE);
+        resultHeader.setVisibility(result != null ? View.VISIBLE : View.GONE);
+        saveBtn.setEnabled(!busy && result != null);
+        shareBtn.setEnabled(!busy && resultFile != null);
+        saveBtn.setAlpha(saveBtn.isEnabled() ? 1f : 0.5f);
+        shareBtn.setAlpha(shareBtn.isEnabled() ? 1f : 0.5f);
 
-    private LinearLayout.LayoutParams cardParams() {
-        return spaced(matchWrap(), 12);
-    }
-
-    private LinearLayout.LayoutParams spaced(LinearLayout.LayoutParams lp, int topDp) {
-        lp.topMargin = dp(topDp);
-        return lp;
-    }
-
-    private <T extends View> T spaced(T v, int topDp) {
-        v.setPadding(v.getPaddingLeft(), dp(topDp), v.getPaddingRight(), v.getPaddingBottom());
-        return v;
-    }
-
-    private GradientDrawable rounded(int color, int radius) {
-        GradientDrawable g = new GradientDrawable();
-        g.setColor(color);
-        g.setCornerRadius(radius);
-        return g;
-    }
-
-    private Drawable ripple(Drawable content) {
-        return new RippleDrawable(ColorStateList.valueOf(Color.argb(60, 255, 255, 255)), content, null);
-    }
-
-    private LinearLayout card() {
-        LinearLayout c = new LinearLayout(this);
-        c.setOrientation(LinearLayout.VERTICAL);
-        c.setBackground(rounded(SURFACE, dp(16)));
-        c.setPadding(dp(14), dp(12), dp(14), dp(14));
-        return c;
-    }
-
-    private Button primaryButton(String text) {
-        Button b = new Button(this);
-        b.setText(text);
-        b.setAllCaps(false);
-        b.setTextColor(Color.WHITE);
-        b.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
-        b.setTypeface(Typeface.DEFAULT_BOLD);
-        b.setMinHeight(dp(52));
-        b.setStateListAnimator(null);
-        GradientDrawable g = new GradientDrawable(GradientDrawable.Orientation.LEFT_RIGHT,
-                new int[]{PRIMARY, PRIMARY_DARK});
-        g.setCornerRadius(dp(14));
-        b.setBackground(ripple(g));
-        return b;
-    }
-
-    private Button secondaryButton(String text) {
-        Button b = new Button(this);
-        b.setText(text);
-        b.setAllCaps(false);
-        b.setTextColor(PRIMARY);
-        b.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
-        b.setTypeface(Typeface.DEFAULT_BOLD);
-        b.setStateListAnimator(null);
-        GradientDrawable g = rounded(Color.WHITE, dp(14));
-        g.setStroke(dp(2), PRIMARY);
-        b.setBackground(new RippleDrawable(ColorStateList.valueOf(Color.argb(40, 79, 70, 229)), g, null));
-        return b;
-    }
-
-    private Button chip(String text) {
-        Button b = new Button(this);
-        b.setText(text);
-        b.setAllCaps(false);
-        b.setTextColor(PRIMARY_DARK);
-        b.setTextSize(TypedValue.COMPLEX_UNIT_SP, 13);
-        b.setStateListAnimator(null);
-        b.setMinWidth(0);
-        b.setMinimumWidth(0);
-        b.setPadding(dp(14), 0, dp(14), 0);
-        b.setBackground(new RippleDrawable(ColorStateList.valueOf(Color.argb(40, 79, 70, 229)),
-                rounded(SURFACE, dp(20)), null));
-        return b;
-    }
-
-    private TextView sectionTitle(String text) {
-        TextView t = label(text);
-        t.setPadding(dp(4), dp(14), 0, dp(6));
-        return t;
-    }
-
-    private TextView label(String text) {
-        TextView t = new TextView(this);
-        t.setText(text);
-        t.setTextColor(TEXT);
-        t.setTypeface(Typeface.DEFAULT_BOLD);
-        t.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
-        return t;
-    }
-
-    private TextView hint(String text) {
-        TextView t = new TextView(this);
-        t.setText(text);
-        t.setTextColor(MUTED);
-        t.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
-        t.setPadding(dp(4), 0, 0, dp(4));
-        return t;
-    }
-
-    private CheckBox checkBox(String text) {
-        CheckBox c = new CheckBox(this);
-        c.setText(text);
-        c.setTextColor(TEXT);
-        c.setButtonTintList(ColorStateList.valueOf(PRIMARY));
-        return c;
-    }
-
-    private RadioButton radio(String text) {
-        RadioButton r = new RadioButton(this);
-        r.setText(text);
-        r.setTextColor(TEXT);
-        r.setId(View.generateViewId());
-        r.setButtonTintList(ColorStateList.valueOf(PRIMARY));
-        return r;
-    }
-
-    private EditText numberField(String hintText, boolean decimal) {
-        EditText e = new EditText(this);
-        e.setHint(hintText);
-        e.setSingleLine(true);
-        e.setTextColor(TEXT);
-        e.setBackgroundTintList(ColorStateList.valueOf(PRIMARY));
-        e.setInputType(InputType.TYPE_CLASS_NUMBER | (decimal ? InputType.TYPE_NUMBER_FLAG_DECIMAL : 0));
-        return e;
-    }
-
-    private void toast(String msg) {
-        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
-    }
-
-    // ---------------------------------------------------------------- lock
-
-    private void onLockToggled(boolean checked) {
-        if (checked) {
-            Shrinker.Options o = readOptions();
-            if (o == null) {
-                restoring = true;
-                lockBox.setChecked(false);
-                restoring = false;
-                toast("Fix the highlighted settings first");
-                return;
-            }
-            savePrefs();
-            applyLockState(true, o);
-            toast("Locked: " + describe(o));
-        } else {
-            applyLockState(false, null);
-            getSharedPreferences(PREFS, MODE_PRIVATE).edit().putBoolean("locked", false).apply();
-            toast("Unlocked");
-        }
-    }
-
-    private void applyLockState(boolean locked, Shrinker.Options o) {
+        View[] lockables = {widthIn, heightIn, maxKbIn, keepAspect, neverReduce};
         for (View v : lockables) {
             v.setEnabled(!locked);
             v.setAlpha(locked ? 0.45f : 1f);
         }
-        if (locked) {
-            getSharedPreferences(PREFS, MODE_PRIVATE).edit().putBoolean("locked", true).apply();
-            lockSummary.setText(describe(o) + "\nEvery photo you select converts automatically. Untick to change.");
-            lockSummary.setTextColor(PRIMARY_DARK);
-            convertBtn.setText("Convert again");
+        format.setEnabled(!locked);
+        boolean aspectApplies = widthIn.length() > 0 && heightIn.length() > 0;
+        keepAspect.setEnabled(!locked && aspectApplies);
+        keepAspect.setAlpha(keepAspect.isEnabled() ? 1f : 0.45f);
+    }
+
+    /** Removes source copies left behind by earlier sessions. */
+    private void cleanupSources() {
+        File[] files = getCacheDir().listFiles();
+        if (files == null) {
+            return;
+        }
+        for (File f : files) {
+            if (f.getName().startsWith("src-") && !f.equals(sourceFile) && !f.delete()) {
+                Log.w(TAG, "could not delete " + f);
+            }
+        }
+    }
+
+    private void setBusy(boolean b, String message) {
+        busy = b;
+        progressText.setText(message == null ? "" : message);
+        if (b) {
+            errorText.setVisibility(View.GONE);
+        }
+        refresh();
+        if (!b && pendingUri != null) {
+            Uri next = pendingUri;
+            pendingUri = null;
+            requestLoad(next);
+        }
+    }
+
+    private void showError(String message) {
+        errorText.setText(message);
+        errorText.setVisibility(View.VISIBLE);
+    }
+
+    private void setPreview(Bitmap b) {
+        if (b != null) {
+            preview.setImageBitmap(b);
+            preview.setVisibility(View.VISIBLE);
+            placeholder.setVisibility(View.GONE);
         } else {
-            lockSummary.setText("Tick to keep the current pixels & KB until you untick.");
-            lockSummary.setTextColor(MUTED);
-            convertBtn.setText("Convert");
+            preview.setImageDrawable(null);
+            preview.setVisibility(View.GONE);
+            placeholder.setText(sourceFile != null ? "Preview unavailable" : "＋\nChoose Photo");
+            placeholder.setVisibility(View.VISIBLE);
         }
     }
 
-    private String describe(Shrinker.Options o) {
-        StringBuilder sb = new StringBuilder();
-        if (o.width > 0 && o.height > 0) {
-            sb.append(o.width).append("×").append(o.height).append(" px").append(o.exact ? " (exact)" : " (fit)");
-        } else if (o.width > 0) {
-            sb.append(o.width).append(" px wide");
-        } else if (o.height > 0) {
-            sb.append(o.height).append(" px tall");
+    private void showOriginal() {
+        if (sourceDims != null) {
+            originalValue.setText(String.format(Locale.US, "%d × %d · %s",
+                    sourceDims[0], sourceDims[1], humanSize(sourceBytes)));
+        }
+    }
+
+    private void showResult() {
+        Shrinker.Result r = result;
+        dimsValue.setText(String.format(Locale.US, "%d × %d", r.width, r.height));
+        sizeValue.setText(humanSize(r.data.length) + " · " + (r.webp ? "WEBP" : "JPG"));
+        String grade;
+        int color;
+        if (r.quality >= 80) {
+            grade = "Excellent";
+            color = ui.green;
+        } else if (r.quality >= 60) {
+            grade = "Good";
+            color = ui.label;
         } else {
-            sb.append("Original pixels");
+            grade = "Low";
+            color = ui.orange;
         }
-        sb.append(" · max ").append(Shrinker.formatKb(o.maxKb)).append(" KB · ").append(o.webp ? "WEBP" : "JPG");
-        if (o.strictResolution) {
-            sb.append(" · strict");
+        qualityValue.setText(r.quality + "% · " + grade);
+        qualityValue.setTextColor(color);
+
+        StringBuilder tip = new StringBuilder();
+        if (r.downscaled()) {
+            tip.append(String.format(Locale.US, "Reduced from %d × %d to fit the size limit.",
+                    r.requestedWidth, r.requestedHeight));
         }
-        return sb.toString();
+        if (r.quality < 60) {
+            if (tip.length() > 0) {
+                tip.append(' ');
+            }
+            tip.append(r.webp ? "For a sharper result, raise the size limit or use fewer pixels."
+                    : "For a sharper result, choose WEBP, raise the size limit, or use fewer pixels.");
+        }
+        resultFooter.setText(tip);
+        resultFooter.setVisibility(tip.length() > 0 ? View.VISIBLE : View.GONE);
     }
 
-    private boolean isLocked() {
-        return lockBox.isChecked();
-    }
-
-    // ---------------------------------------------------------------- prefs
+    // ================================================================ settings & lock
 
     private void loadPrefs() {
         SharedPreferences sp = getSharedPreferences(PREFS, MODE_PRIVATE);
+        restoring = true;
         widthIn.setText(sp.getString("width", "1000"));
         heightIn.setText(sp.getString("height", "1000"));
         maxKbIn.setText(sp.getString("maxKb", "100"));
-        minQualityIn.setText(sp.getString("minQ", "40"));
-        exactBox.setChecked(sp.getBoolean("exact", true));
-        strictBox.setChecked(sp.getBoolean("strict", false));
-        upscaleBox.setChecked(sp.getBoolean("upscale", false));
-        if (sp.getBoolean("webp", false)) {
-            webpBtn.setChecked(true);
-        } else {
-            jpegBtn.setChecked(true);
-        }
-        boolean locked = sp.getBoolean("locked", false);
-        Shrinker.Options o = locked ? readOptions() : null;
-        if (locked && o == null) {
-            locked = false;
-        }
-        restoring = true;
-        lockBox.setChecked(locked);
+        keepAspect.setChecked(sp.getBoolean("keepAspect", true));
+        neverReduce.setChecked(sp.getBoolean("strict", false));
+        format.select(sp.getBoolean("webp", false) ? 1 : 0);
+        boolean locked = sp.getBoolean("locked", false) && readOptions(false) != null;
+        lockSwitch.setChecked(locked);
         restoring = false;
-        applyLockState(locked, o);
+        updateLockFooter();
+
+        android.text.TextWatcher watcher = new android.text.TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
+
+            @Override
+            public void afterTextChanged(android.text.Editable s) {
+                if (!restoring) {
+                    refresh();
+                }
+            }
+        };
+        widthIn.addTextChangedListener(watcher);
+        heightIn.addTextChangedListener(watcher);
     }
 
     private void savePrefs() {
@@ -615,75 +547,146 @@ public class MainActivity extends Activity {
                 .putString("width", widthIn.getText().toString().trim())
                 .putString("height", heightIn.getText().toString().trim())
                 .putString("maxKb", maxKbIn.getText().toString().trim())
-                .putString("minQ", minQualityIn.getText().toString().trim())
-                .putBoolean("exact", exactBox.isChecked())
-                .putBoolean("strict", strictBox.isChecked())
-                .putBoolean("upscale", upscaleBox.isChecked())
-                .putBoolean("webp", webpBtn.isChecked())
+                .putBoolean("keepAspect", keepAspect.isChecked())
+                .putBoolean("strict", neverReduce.isChecked())
+                .putBoolean("webp", format.selected() == 1)
+                .putBoolean("locked", lockSwitch.isChecked())
                 .apply();
     }
 
-    private void applyPreset(Object[] p) {
-        if (isLocked()) {
+    private void onLockToggled(boolean checked) {
+        if (checked && readOptions(true) == null) {
+            restoring = true;
+            lockSwitch.setChecked(false);
+            restoring = false;
             return;
         }
-        int w = (Integer) p[1];
-        int h = (Integer) p[2];
-        widthIn.setText(w > 0 ? String.valueOf(w) : "");
-        heightIn.setText(h > 0 ? String.valueOf(h) : "");
-        maxKbIn.setText(Shrinker.formatKb((Double) p[3]));
-        exactBox.setChecked((Boolean) p[4]);
-        jpegBtn.setChecked(true);
-        widthIn.setError(null);
-        heightIn.setError(null);
-        maxKbIn.setError(null);
-        toast("Preset: " + p[0]);
+        hideKeyboard();
+        savePrefs();
+        updateLockFooter();
+        refresh();
     }
 
-    // ---------------------------------------------------------------- state
-
-    private void updateButtons() {
-        pickBtn.setEnabled(!busy);
-        convertBtn.setEnabled(!busy && sourceFile != null);
-        saveBtn.setEnabled(!busy && result != null);
-        shareBtn.setEnabled(!busy && resultFile != null);
-        convertBtn.setAlpha(convertBtn.isEnabled() ? 1f : 0.5f);
-        pickBtn.setAlpha(pickBtn.isEnabled() ? 1f : 0.5f);
-        saveBtn.setAlpha(saveBtn.isEnabled() ? 1f : 0.4f);
-        shareBtn.setAlpha(shareBtn.isEnabled() ? 1f : 0.4f);
-        progress.setVisibility(busy ? View.VISIBLE : View.GONE);
+    private void updateLockFooter() {
+        if (lockSwitch.isChecked()) {
+            Shrinker.Options o = readOptions(false);
+            lockFooter.setText((o != null ? describe(o) + ". " : "")
+                    + "Every photo you choose converts automatically. Turn off to change.");
+        } else {
+            lockFooter.setText("Keep these settings for every photo until you turn this off.");
+        }
     }
 
-    private void setBusy(boolean b) {
-        busy = b;
-        updateButtons();
+    private String describe(Shrinker.Options o) {
+        StringBuilder sb = new StringBuilder();
+        if (o.width > 0 && o.height > 0) {
+            sb.append(o.width).append(" × ").append(o.height).append(" px");
+            if (o.keepAspect) {
+                sb.append(" (fit)");
+            }
+        } else if (o.width > 0) {
+            sb.append(o.width).append(" px wide");
+        } else if (o.height > 0) {
+            sb.append(o.height).append(" px tall");
+        } else {
+            sb.append("Original pixels");
+        }
+        sb.append(", max ").append(Shrinker.formatKb(o.maxKb)).append(" KB, ").append(o.webp ? "WEBP" : "JPG");
+        return sb.toString();
     }
 
-    private void setStatus(String text, int color) {
-        status.setTextColor(color);
-        status.setText(text);
+    private Integer readDimension(EditText e, boolean showErrors) {
+        String s = e.getText().toString().trim();
+        if (s.isEmpty()) {
+            return 0;
+        }
+        try {
+            int v = Integer.parseInt(s);
+            if (v >= Shrinker.MIN_DIMENSION && v <= Shrinker.MAX_DIMENSION) {
+                return v;
+            }
+        } catch (NumberFormatException ignored) {
+            // fall through to the error below
+        }
+        if (showErrors) {
+            e.setError(Shrinker.MIN_DIMENSION + "–" + Shrinker.MAX_DIMENSION);
+        }
+        return null;
     }
 
-    // ---------------------------------------------------------------- pick & load
+    private Shrinker.Options readOptions(boolean showErrors) {
+        Integer w = readDimension(widthIn, showErrors);
+        Integer h = readDimension(heightIn, showErrors);
+        Double kb = null;
+        try {
+            double v = Double.parseDouble(maxKbIn.getText().toString().trim());
+            if (v >= 1 && v <= 100000) {
+                kb = v;
+            }
+        } catch (NumberFormatException ignored) {
+            // handled below
+        }
+        if (kb == null && showErrors) {
+            maxKbIn.setError("1–100000");
+        }
+        if (w == null || h == null || kb == null) {
+            return null;
+        }
+        Shrinker.Options o = new Shrinker.Options();
+        o.width = w;
+        o.height = h;
+        o.keepAspect = keepAspect.isChecked();
+        o.strictResolution = neverReduce.isChecked();
+        o.maxKb = kb;
+        o.webp = format.selected() == 1;
+        o.background = Color.WHITE;
+        return o;
+    }
+
+    private void hideKeyboard() {
+        View f = getCurrentFocus();
+        if (f != null) {
+            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+            if (imm != null) {
+                imm.hideSoftInputFromWindow(f.getWindowToken(), 0);
+            }
+            f.clearFocus();
+        }
+    }
+
+    // ================================================================ pick & load
 
     private void pickImage() {
+        if (busy) {
+            return;
+        }
         Intent i = new Intent(Intent.ACTION_GET_CONTENT);
         i.setType("image/*");
         i.addCategory(Intent.CATEGORY_OPENABLE);
         try {
-            startActivityForResult(Intent.createChooser(i, "Select photo"), REQ_PICK);
+            startActivityForResult(Intent.createChooser(i, "Choose Photo"), REQ_PICK);
         } catch (ActivityNotFoundException e) {
             toast("No gallery or file app found");
         }
     }
 
+    /** Loads now, or after the running job finishes so it never overwrites a file in use. */
+    private void requestLoad(Uri uri) {
+        if (busy) {
+            pendingUri = uri;
+            return;
+        }
+        loadSource(uri);
+    }
+
     private void loadSource(final Uri uri) {
-        setBusy(true);
-        setStatus("Loading photo…", MUTED);
+        hideKeyboard();
+        setBusy(true, "Opening photo…");
+        final File previous = sourceFile;
         new Thread(new Runnable() {
             @Override
             public void run() {
-                final File dest = new File(getCacheDir(), "source.bin");
+                final File dest = new File(getCacheDir(), "src-" + System.nanoTime() + ".img");
                 final String name = displayName(uri);
                 String error = null;
                 long bytes = 0;
@@ -692,7 +695,7 @@ public class MainActivity extends Activity {
                 try (InputStream in = getContentResolver().openInputStream(uri);
                      OutputStream out = new FileOutputStream(dest)) {
                     if (in == null) {
-                        throw new IOException("Cannot open this file");
+                        throw new IOException("the file could not be opened");
                     }
                     byte[] buf = new byte[64 * 1024];
                     int n;
@@ -702,15 +705,18 @@ public class MainActivity extends Activity {
                     }
                 } catch (IOException | SecurityException e) {
                     Log.e(TAG, "load failed", e);
-                    error = "Cannot open photo: " + e.getMessage();
+                    error = "Couldn't open this photo: " + e.getMessage();
                 }
                 if (error == null) {
                     dims = Shrinker.orientedBounds(dest);
                     if (dims == null) {
-                        error = "This file is not a supported image.";
+                        error = "This file isn't a supported image.";
                     } else {
-                        thumb = decodePreviewFile(dest);
+                        thumb = decodePreview(dest);
                     }
+                }
+                if (error != null && !dest.delete()) {
+                    Log.w(TAG, "could not delete " + dest);
                 }
                 final String err = error;
                 final long size = bytes;
@@ -722,26 +728,25 @@ public class MainActivity extends Activity {
                         if (destroyed) {
                             return;
                         }
-                        setBusy(false);
                         if (err != null) {
-                            setStatus("✗ " + err, ERROR);
+                            setBusy(false, null);
+                            showError(err);
                             return;
+                        }
+                        if (previous != null && !previous.equals(dest) && !previous.delete()) {
+                            Log.w(TAG, "could not delete " + previous);
                         }
                         sourceFile = dest;
                         sourceName = name;
                         sourceBytes = size;
+                        sourceDims = d;
                         result = null;
                         resultFile = null;
-                        if (t != null) {
-                            preview.setImageBitmap(t);
-                        }
-                        sourceInfo.setText(String.format(Locale.US, "Original: %s · %d×%d · %s",
-                                name, d[0], d[1], humanSize(size)));
-                        updateButtons();
-                        if (isLocked()) {
+                        setPreview(t);
+                        showOriginal();
+                        setBusy(false, null);
+                        if (lockSwitch.isChecked() && pendingUri == null) {
                             convert();
-                        } else {
-                            setStatus("Ready. Set pixels and KB, then tap Convert.", MUTED);
                         }
                     }
                 });
@@ -761,21 +766,40 @@ public class MainActivity extends Activity {
         if (TextUtils.isEmpty(name)) {
             name = uri.getLastPathSegment();
         }
-        if (TextUtils.isEmpty(name)) {
-            name = "photo";
+        return sanitizeStem(name);
+    }
+
+    /** File-system and share-safe stem: no extension, no leading dots, bounded length. */
+    static String sanitizeStem(String name) {
+        if (name == null) {
+            return "photo";
+        }
+        int slash = name.lastIndexOf('/');
+        if (slash >= 0) {
+            name = name.substring(slash + 1);
         }
         int dot = name.lastIndexOf('.');
         String stem = dot > 0 ? name.substring(0, dot) : name;
-        stem = stem.replaceAll("[^A-Za-z0-9._ -]", "_").trim();
+        stem = stem.replaceAll("[^A-Za-z0-9._ -]", "_").trim().replaceAll("^[.\\s]+", "");
+        if (stem.length() > MAX_STEM) {
+            stem = stem.substring(0, MAX_STEM).trim();
+        }
         return stem.isEmpty() ? "photo" : stem;
     }
 
-    private Bitmap decodePreviewFile(File f) {
+    private Bitmap decodePreview(File f) {
         BitmapFactory.Options b = new BitmapFactory.Options();
         b.inJustDecodeBounds = true;
         BitmapFactory.decodeFile(f.getPath(), b);
+        if (b.outWidth <= 0 || b.outHeight <= 0) {
+            return null;
+        }
+        int s = 1;
+        while (b.outWidth / (s * 2) >= PREVIEW_MAX || b.outHeight / (s * 2) >= PREVIEW_MAX) {
+            s *= 2;
+        }
         BitmapFactory.Options o = new BitmapFactory.Options();
-        o.inSampleSize = sampleFor(b.outWidth, b.outHeight);
+        o.inSampleSize = s;
         try {
             return BitmapFactory.decodeFile(f.getPath(), o);
         } catch (OutOfMemoryError e) {
@@ -783,101 +807,22 @@ public class MainActivity extends Activity {
         }
     }
 
-    private Bitmap decodePreviewBytes(byte[] data) {
-        BitmapFactory.Options b = new BitmapFactory.Options();
-        b.inJustDecodeBounds = true;
-        BitmapFactory.decodeByteArray(data, 0, data.length, b);
-        BitmapFactory.Options o = new BitmapFactory.Options();
-        o.inSampleSize = sampleFor(b.outWidth, b.outHeight);
-        try {
-            return BitmapFactory.decodeByteArray(data, 0, data.length, o);
-        } catch (OutOfMemoryError e) {
-            return null;
-        }
-    }
-
-    private static int sampleFor(int w, int h) {
-        int s = 1;
-        while (w / (s * 2) >= PREVIEW_MAX || h / (s * 2) >= PREVIEW_MAX) {
-            s *= 2;
-        }
-        return s;
-    }
-
-    // ---------------------------------------------------------------- convert
-
-    private Integer readInt(EditText e, int min, int max, boolean optional, String name) {
-        String s = e.getText().toString().trim();
-        if (s.isEmpty()) {
-            if (optional) {
-                return 0;
-            }
-            e.setError(name + " required");
-            return null;
-        }
-        try {
-            int v = Integer.parseInt(s);
-            if (v < min || v > max) {
-                e.setError(name + " must be " + min + "–" + max);
-                return null;
-            }
-            return v;
-        } catch (NumberFormatException ex) {
-            e.setError("Invalid number");
-            return null;
-        }
-    }
-
-    private Shrinker.Options readOptions() {
-        Integer w = readInt(widthIn, Shrinker.MIN_DIMENSION, 20000, true, "Width");
-        Integer h = readInt(heightIn, Shrinker.MIN_DIMENSION, 20000, true, "Height");
-        Integer minQ = readInt(minQualityIn, 1, 95, false, "Min quality");
-        Double kb = null;
-        try {
-            kb = Double.parseDouble(maxKbIn.getText().toString().trim());
-            if (kb < 1 || kb > 100000) {
-                maxKbIn.setError("KB must be 1–100000");
-                kb = null;
-            }
-        } catch (NumberFormatException ex) {
-            maxKbIn.setError("Enter a KB value, e.g. 100");
-        }
-        if (w == null || h == null || minQ == null || kb == null) {
-            return null;
-        }
-        if (exactBox.isChecked() && (w == 0 || h == 0)) {
-            toast("Exact size needs both width and height");
-            return null;
-        }
-        Shrinker.Options o = new Shrinker.Options();
-        o.width = w;
-        o.height = h;
-        o.exact = exactBox.isChecked();
-        o.strictResolution = strictBox.isChecked();
-        o.allowUpscale = upscaleBox.isChecked();
-        o.maxKb = kb;
-        o.minQuality = minQ;
-        o.maxQuality = 95;
-        o.webp = webpBtn.isChecked();
-        return o;
-    }
+    // ================================================================ convert
 
     private void convert() {
-        if (sourceFile == null) {
-            toast("Select a photo first");
+        if (busy || sourceFile == null) {
             return;
         }
-        final Shrinker.Options o = readOptions();
+        final Shrinker.Options o = readOptions(true);
         if (o == null) {
             return;
         }
-        if (!isLocked()) {
-            savePrefs();
-        }
-        setBusy(true);
+        hideKeyboard();
+        savePrefs();
+        updateLockFooter();
         result = null;
         resultFile = null;
-        setStatus("Converting…", MUTED);
+        setBusy(true, "Converting…");
         final File src = sourceFile;
         final String stem = sourceName;
         new Thread(new Runnable() {
@@ -895,24 +840,24 @@ public class MainActivity extends Activity {
                                 @Override
                                 public void run() {
                                     if (!destroyed) {
-                                        setStatus(message, MUTED);
+                                        progressText.setText(message);
                                     }
                                 }
                             });
                         }
                     });
                     out = writeResult(r, stem);
-                    thumb = decodePreviewBytes(r.data);
+                    thumb = decodePreview(out);
                 } catch (Shrinker.ShrinkException e) {
                     error = e.getMessage();
                 } catch (IOException e) {
                     Log.e(TAG, "write failed", e);
-                    error = "Could not write output: " + e.getMessage();
+                    error = "Couldn't save the result: " + e.getMessage();
                 } catch (OutOfMemoryError e) {
-                    error = "Out of memory. Try a smaller resolution.";
+                    error = "Not enough memory. Try fewer pixels.";
                 } catch (RuntimeException e) {
                     Log.e(TAG, "convert failed", e);
-                    error = "Conversion failed: " + e;
+                    error = "Conversion failed. Please try another photo.";
                 }
                 final Shrinker.Result fr = r;
                 final File fo = out;
@@ -924,60 +869,64 @@ public class MainActivity extends Activity {
                         if (destroyed) {
                             return;
                         }
-                        setBusy(false);
                         if (err != null) {
-                            setStatus("✗ " + err, ERROR);
+                            setBusy(false, null);
+                            showError(err);
                             return;
                         }
                         result = fr;
                         resultFile = fo;
                         if (t != null) {
-                            preview.setImageBitmap(t);
+                            setPreview(t);
                         }
-                        StringBuilder sb = new StringBuilder();
-                        sb.append(String.format(Locale.US, "✓ %d×%d · %s · %s quality %d",
-                                fr.width, fr.height, humanSize(fr.data.length),
-                                fr.webp ? "WEBP" : "JPG", fr.quality));
-                        sb.append(String.format(Locale.US, "\nFrom %d×%d · %s",
-                                fr.originalWidth, fr.originalHeight, humanSize(sourceBytes)));
-                        if (fr.downscaled()) {
-                            sb.append(String.format(Locale.US,
-                                    "\nNote: %d×%d could not fit the KB limit, reduced to %d×%d."
-                                            + " Tick \"Never reduce pixels\" to prevent this.",
-                                    fr.requestedWidth, fr.requestedHeight, fr.width, fr.height));
-                        }
-                        setStatus(sb.toString(), OK);
-                        updateButtons();
+                        showResult();
+                        setBusy(false, null);
                     }
                 });
             }
         }).start();
     }
 
+    /** Writes into cache/out with a unique name; keeps recent files so earlier shares stay readable. */
     private File writeResult(Shrinker.Result r, String stem) throws IOException {
         File dir = new File(getCacheDir(), ShareProvider.OUT_DIR);
         if (!dir.isDirectory() && !dir.mkdirs()) {
-            throw new IOException("Cannot create " + dir);
+            throw new IOException("can't create " + dir);
         }
-        File[] old = dir.listFiles();
-        if (old != null) {
-            for (File f : old) {
-                if (!f.delete()) {
-                    Log.w(TAG, "could not delete " + f);
-                }
-            }
+        String base = stem + "_" + r.width + "x" + r.height;
+        File out = new File(dir, base + r.extension());
+        for (int i = 2; out.exists(); i++) {
+            out = new File(dir, base + "-" + i + r.extension());
         }
-        File out = new File(dir, stem + "_" + r.width + "x" + r.height + r.extension());
         try (FileOutputStream fos = new FileOutputStream(out)) {
             fos.write(r.data);
         }
+        pruneResults(dir);
         return out;
     }
 
-    // ---------------------------------------------------------------- save & share
+    private static void pruneResults(File dir) {
+        File[] files = dir.listFiles();
+        if (files == null || files.length <= KEEP_RESULTS) {
+            return;
+        }
+        Arrays.sort(files, new Comparator<File>() {
+            @Override
+            public int compare(File a, File b) {
+                return Long.compare(b.lastModified(), a.lastModified());
+            }
+        });
+        for (int i = KEEP_RESULTS; i < files.length; i++) {
+            if (!files[i].delete()) {
+                Log.w(TAG, "could not delete " + files[i]);
+            }
+        }
+    }
+
+    // ================================================================ save & share
 
     private void save() {
-        if (result == null || resultFile == null) {
+        if (busy || result == null || resultFile == null) {
             return;
         }
         if (Build.VERSION.SDK_INT >= 29) {
@@ -990,14 +939,14 @@ public class MainActivity extends Activity {
             try {
                 startActivityForResult(i, REQ_SAVE);
             } catch (ActivityNotFoundException e) {
-                toast("No file manager available to save. Use Share instead.");
+                toast("No file manager available. Use Share instead.");
             }
         }
     }
 
     /** API 29+: write straight into Pictures/PhotoShrink through MediaStore, no permission needed. */
     private void saveToGallery(final Shrinker.Result r, final String name) {
-        setBusy(true);
+        setBusy(true, "Saving…");
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -1011,35 +960,35 @@ public class MainActivity extends Activity {
                     v.put("is_pending", 1);
                     uri = getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, v);
                     if (uri == null) {
-                        throw new IOException("Gallery refused the file");
+                        throw new IOException("the gallery refused the file");
                     }
                     try (OutputStream out = getContentResolver().openOutputStream(uri, "w")) {
                         if (out == null) {
-                            throw new IOException("Cannot open gallery file");
+                            throw new IOException("can't open the gallery file");
                         }
                         out.write(r.data);
                     }
                     ContentValues done = new ContentValues();
                     done.put("is_pending", 0);
                     getContentResolver().update(uri, done, null, null);
-                    msg = "Saved to " + GALLERY_DIR + " (" + humanSize(r.data.length) + ")";
+                    msg = "Saved to Gallery";
                 } catch (IOException | RuntimeException e) {
                     Log.e(TAG, "gallery save failed", e);
                     if (uri != null) {
                         try {
                             getContentResolver().delete(uri, null, null);
-                        } catch (RuntimeException ignored) {
-                            Log.w(TAG, "cleanup failed", ignored);
+                        } catch (RuntimeException cleanup) {
+                            Log.w(TAG, "cleanup failed", cleanup);
                         }
                     }
-                    msg = "Save failed: " + e.getMessage();
+                    msg = "Couldn't save: " + e.getMessage();
                 }
                 final String m = msg;
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         if (!destroyed) {
-                            setBusy(false);
+                            setBusy(false, null);
                             toast(m);
                         }
                     }
@@ -1054,18 +1003,18 @@ public class MainActivity extends Activity {
         }
         try (OutputStream out = getContentResolver().openOutputStream(uri, "w")) {
             if (out == null) {
-                throw new IOException("Cannot open destination");
+                throw new IOException("can't open the destination");
             }
             out.write(result.data);
-            toast("Saved (" + humanSize(result.data.length) + ")");
+            toast("Saved");
         } catch (IOException | SecurityException e) {
             Log.e(TAG, "save failed", e);
-            toast("Save failed: " + e.getMessage());
+            toast("Couldn't save: " + e.getMessage());
         }
     }
 
     private void share() {
-        if (result == null || resultFile == null || !resultFile.isFile()) {
+        if (busy || result == null || resultFile == null || !resultFile.isFile()) {
             return;
         }
         Uri uri = ShareProvider.uriFor(resultFile);
@@ -1075,7 +1024,7 @@ public class MainActivity extends Activity {
         send.setClipData(ClipData.newRawUri(resultFile.getName(), uri));
         send.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         try {
-            startActivity(Intent.createChooser(send, "Share photo"));
+            startActivity(Intent.createChooser(send, "Share Photo"));
         } catch (ActivityNotFoundException e) {
             toast("No app available to share");
         }
@@ -1088,10 +1037,35 @@ public class MainActivity extends Activity {
             return;
         }
         if (requestCode == REQ_PICK) {
-            loadSource(data.getData());
+            requestLoad(data.getData());
         } else if (requestCode == REQ_SAVE) {
             writeTo(data.getData());
         }
+    }
+
+    // ================================================================ util
+
+    private void toast(String msg) {
+        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+    }
+
+    private static byte[] readFile(File f) throws IOException {
+        long len = f.length();
+        if (len > Integer.MAX_VALUE) {
+            throw new IOException("file too large");
+        }
+        byte[] data = new byte[(int) len];
+        try (InputStream in = new FileInputStream(f)) {
+            int off = 0;
+            while (off < data.length) {
+                int n = in.read(data, off, data.length - off);
+                if (n < 0) {
+                    throw new IOException("unexpected end of file");
+                }
+                off += n;
+            }
+        }
+        return data;
     }
 
     private static String humanSize(long bytes) {
