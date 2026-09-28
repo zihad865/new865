@@ -23,19 +23,20 @@ import java.util.Locale;
 final class Shrinker {
 
     static final int MIN_DIMENSION = 16;
-    static final float DOWNSCALE_STEP = 0.90f;
-    private static final int MAX_DECODE_RETRIES = 4;
+    static final int MAX_DIMENSION = 20000;
+    static final int MIN_QUALITY = 40;
+    static final int MAX_QUALITY = 95;
+    private static final float DOWNSCALE_STEP = 0.90f;
+    private static final int MAX_OOM_RETRIES = 4;
+    private static final int INITIAL_BUFFER = 256 * 1024;
 
     static final class Options {
         int width;              // 0 = not set
         int height;             // 0 = not set
-        boolean exact;
-        boolean allowUpscale;
+        boolean keepAspect = true;
         boolean strictResolution;
         double maxKb = 100;
         boolean webp;
-        int minQuality = 40;
-        int maxQuality = 95;
         int background = Color.WHITE;
     }
 
@@ -45,20 +46,16 @@ final class Shrinker {
         final int height;
         final int quality;
         final boolean webp;
-        final int originalWidth;
-        final int originalHeight;
         final int requestedWidth;
         final int requestedHeight;
 
         Result(byte[] data, int width, int height, int quality, boolean webp,
-               int originalWidth, int originalHeight, int requestedWidth, int requestedHeight) {
+               int requestedWidth, int requestedHeight) {
             this.data = data;
             this.width = width;
             this.height = height;
             this.quality = quality;
             this.webp = webp;
-            this.originalWidth = originalWidth;
-            this.originalHeight = originalHeight;
             this.requestedWidth = requestedWidth;
             this.requestedHeight = requestedHeight;
         }
@@ -92,8 +89,9 @@ final class Shrinker {
     static int[] targetSize(int w, int h, Options o) {
         int nw;
         int nh;
+        boolean exact = o.width > 0 && o.height > 0 && !o.keepAspect;
         if (o.width > 0 && o.height > 0) {
-            if (o.exact) {
+            if (exact) {
                 nw = o.width;
                 nh = o.height;
             } else {
@@ -111,7 +109,8 @@ final class Shrinker {
             nw = w;
             nh = h;
         }
-        if (!o.allowUpscale && !o.exact && (nw > w || nh > h)) {
+        // Never enlarge unless the user asked for an exact (stretched) size.
+        if (!exact && (nw > w || nh > h)) {
             double r = Math.min((double) w / nw, (double) h / nh);
             nw = (int) Math.round(nw * r);
             nh = (int) Math.round(nh * r);
@@ -127,8 +126,8 @@ final class Shrinker {
         if (bounds.outWidth <= 0 || bounds.outHeight <= 0) {
             return null;
         }
-        boolean swap = swapsAxes(readOrientation(source));
-        return swap ? new int[]{bounds.outHeight, bounds.outWidth}
+        return swapsAxes(readOrientation(source))
+                ? new int[]{bounds.outHeight, bounds.outWidth}
                 : new int[]{bounds.outWidth, bounds.outHeight};
     }
 
@@ -137,7 +136,7 @@ final class Shrinker {
         bounds.inJustDecodeBounds = true;
         BitmapFactory.decodeFile(source.getPath(), bounds);
         if (bounds.outWidth <= 0 || bounds.outHeight <= 0) {
-            throw new ShrinkException("Cannot read this image. Unsupported or corrupted file.");
+            throw new ShrinkException("This file can't be read as an image.");
         }
 
         int orientation = readOrientation(source);
@@ -145,32 +144,53 @@ final class Shrinker {
         int ow = swap ? bounds.outHeight : bounds.outWidth;
         int oh = swap ? bounds.outWidth : bounds.outHeight;
         int[] target = targetSize(ow, oh, o);
-
-        p.onProgress("Decoding " + ow + "×" + oh + "…");
         int reqW = swap ? target[1] : target[0];
         int reqH = swap ? target[0] : target[1];
-        Bitmap base = applyOrientation(decodeAtLeast(source, bounds.outWidth, bounds.outHeight, reqW, reqH), orientation);
-        try {
-            return fit(base, target, ow, oh, o, p);
-        } finally {
-            base.recycle();
+
+        int sample = 1;
+        while (bounds.outWidth / (sample * 2) >= reqW && bounds.outHeight / (sample * 2) >= reqH) {
+            sample *= 2;
         }
+
+        // Any step (decode, rotate, scale, encode) can run out of memory on huge photos;
+        // retry the whole pipeline from a smaller decode instead of failing.
+        for (int attempt = 0; attempt <= MAX_OOM_RETRIES; attempt++) {
+            Bitmap base = null;
+            try {
+                p.onProgress("Preparing photo…");
+                BitmapFactory.Options opts = new BitmapFactory.Options();
+                opts.inSampleSize = sample;
+                opts.inPreferredConfig = Bitmap.Config.ARGB_8888;
+                Bitmap decoded = BitmapFactory.decodeFile(source.getPath(), opts);
+                if (decoded == null) {
+                    throw new ShrinkException("This file can't be read as an image.");
+                }
+                base = applyOrientation(decoded, orientation);
+                return fit(base, target, o, p);
+            } catch (OutOfMemoryError e) {
+                sample *= 2;
+            } finally {
+                if (base != null) {
+                    base.recycle();
+                }
+            }
+        }
+        throw new ShrinkException("This photo is too large for the memory on this device.");
     }
 
-    private static Result fit(Bitmap base, int[] target, int ow, int oh, Options o, Progress p)
-            throws ShrinkException {
-        int budget = (int) (o.maxKb * 1024);
+    private static Result fit(Bitmap base, int[] target, Options o, Progress p) throws ShrinkException {
+        int budget = (int) Math.min(Integer.MAX_VALUE, o.maxKb * 1024);
         int w = target[0];
         int h = target[1];
-        while (w >= MIN_DIMENSION && h >= MIN_DIMENSION) {
-            p.onProgress(String.format(Locale.US, "Trying %d×%d…", w, h));
+        while (true) {
+            p.onProgress(String.format(Locale.US, "Compressing %d × %d…", w, h));
             Bitmap scaled = scale(base, w, h);
             Bitmap prepared = o.webp ? scaled : flatten(scaled, o.background);
             try {
                 int[] quality = new int[1];
-                byte[] data = bestQuality(prepared, o, budget, quality);
+                byte[] data = bestQuality(prepared, o.webp, budget, quality);
                 if (data != null) {
-                    return new Result(data, w, h, quality[0], o.webp, ow, oh, target[0], target[1]);
+                    return new Result(data, w, h, quality[0], o.webp, target[0], target[1]);
                 }
             } finally {
                 if (prepared != scaled) {
@@ -182,23 +202,27 @@ final class Shrinker {
             }
             if (o.strictResolution) {
                 throw new ShrinkException(String.format(Locale.US,
-                        "%d×%d does not fit under %s KB even at quality %d.\n"
-                                + "Increase the KB limit, lower the min quality, or turn off strict resolution.",
-                        w, h, formatKb(o.maxKb), o.minQuality));
+                        "%d × %d can't fit in %s KB without reducing pixels.\n"
+                                + "Raise the size limit or turn off \"Never Reduce Pixels\".",
+                        w, h, formatKb(o.maxKb)));
             }
-            w = (int) (w * DOWNSCALE_STEP);
-            h = (int) (h * DOWNSCALE_STEP);
+            int nw = (int) (w * DOWNSCALE_STEP);
+            int nh = (int) (h * DOWNSCALE_STEP);
+            if (nw < MIN_DIMENSION || nh < MIN_DIMENSION) {
+                throw new ShrinkException("Can't fit this photo in " + formatKb(o.maxKb) + " KB. Raise the size limit.");
+            }
+            w = nw;
+            h = nh;
         }
-        throw new ShrinkException("Cannot fit under " + formatKb(o.maxKb) + " KB with these settings.");
     }
 
     /** Binary search for the highest quality whose output is within budget. */
-    private static byte[] bestQuality(Bitmap bmp, Options o, int budget, int[] qualityOut) {
-        Bitmap.CompressFormat fmt = o.webp ? Bitmap.CompressFormat.WEBP : Bitmap.CompressFormat.JPEG;
-        int lo = o.minQuality;
-        int hi = o.maxQuality;
+    private static byte[] bestQuality(Bitmap bmp, boolean webp, int budget, int[] qualityOut) {
+        Bitmap.CompressFormat fmt = webp ? Bitmap.CompressFormat.WEBP : Bitmap.CompressFormat.JPEG;
+        int lo = MIN_QUALITY;
+        int hi = MAX_QUALITY;
         byte[] best = null;
-        ByteArrayOutputStream buf = new ByteArrayOutputStream(Math.max(budget, 1024));
+        ByteArrayOutputStream buf = new ByteArrayOutputStream(Math.min(budget, INITIAL_BUFFER));
         while (lo <= hi) {
             int mid = (lo + hi) >>> 1;
             buf.reset();
@@ -215,29 +239,6 @@ final class Shrinker {
             }
         }
         return best;
-    }
-
-    private static Bitmap decodeAtLeast(File source, int srcW, int srcH, int reqW, int reqH)
-            throws ShrinkException {
-        int sample = 1;
-        while (srcW / (sample * 2) >= reqW && srcH / (sample * 2) >= reqH) {
-            sample *= 2;
-        }
-        for (int attempt = 0; attempt < MAX_DECODE_RETRIES; attempt++) {
-            BitmapFactory.Options opts = new BitmapFactory.Options();
-            opts.inSampleSize = sample;
-            opts.inPreferredConfig = Bitmap.Config.ARGB_8888;
-            try {
-                Bitmap bmp = BitmapFactory.decodeFile(source.getPath(), opts);
-                if (bmp == null) {
-                    throw new ShrinkException("Cannot decode this image.");
-                }
-                return bmp;
-            } catch (OutOfMemoryError e) {
-                sample *= 2;
-            }
-        }
-        throw new ShrinkException("Image is too large for available memory.");
     }
 
     /** Multi-step halving before the final resize keeps downscaled images sharp and alias-free. */
@@ -289,6 +290,7 @@ final class Shrinker {
                 || orientation == ExifInterface.ORIENTATION_TRANSVERSE;
     }
 
+    /** Returns the oriented bitmap; recycles the input if a new one was created. */
     private static Bitmap applyOrientation(Bitmap bmp, int orientation) {
         Matrix m = new Matrix();
         switch (orientation) {
@@ -318,11 +320,16 @@ final class Shrinker {
             default:
                 return bmp;
         }
-        Bitmap out = Bitmap.createBitmap(bmp, 0, 0, bmp.getWidth(), bmp.getHeight(), m, true);
-        if (out != bmp) {
+        try {
+            Bitmap out = Bitmap.createBitmap(bmp, 0, 0, bmp.getWidth(), bmp.getHeight(), m, true);
+            if (out != bmp) {
+                bmp.recycle();
+            }
+            return out;
+        } catch (OutOfMemoryError e) {
             bmp.recycle();
+            throw e;
         }
-        return out;
     }
 
     static String formatKb(double kb) {
