@@ -15,6 +15,7 @@ set -euo pipefail
 cd "$(dirname "$0")"
 ANDROID_JAR="${ANDROID_JAR:-/usr/lib/android-sdk/platforms/android-23/android.jar}"
 BUNDLETOOL_VERSION="1.18.1"
+BUNDLETOOL_SHA256="675786493983787ffa11550bdb7c0715679a44e1643f3ff980a529e9c822595c"
 BUNDLETOOL="${BUNDLETOOL:-tools/bundletool-all-${BUNDLETOOL_VERSION}.jar}"
 KEYSTORE="${KEYSTORE:-keystore/upload.jks}"
 KEY_ALIAS="${KEY_ALIAS:-upload}"
@@ -38,9 +39,15 @@ if [[ ! -f "$BUNDLETOOL" ]]; then
     mv "$BUNDLETOOL.part" "$BUNDLETOOL"
 fi
 
-AAPT2="${AAPT2:-tools/aapt2}"
-if [[ ! -x "$AAPT2" ]]; then
-    log "Extracting aapt2 from bundletool"
+# bundletool and the aapt2 inside it run with access to the signing key: pin the release.
+actual_sha="$(sha256sum "$BUNDLETOOL" | cut -d' ' -f1)"
+if [[ "$actual_sha" != "$BUNDLETOOL_SHA256" ]]; then
+    die "bundletool checksum mismatch: expected $BUNDLETOOL_SHA256, got $actual_sha (delete $BUNDLETOOL to re-download)"
+fi
+
+# Re-extract aapt2 from the verified jar on every build unless AAPT2 points elsewhere.
+if [[ -z "${AAPT2:-}" ]]; then
+    AAPT2=tools/aapt2
     case "$(uname -s)" in
         Linux) plat=linux/aapt2 ;;
         Darwin) plat=macos/aapt2 ;;
@@ -62,12 +69,14 @@ if [[ -z "${KEYSTORE_PASS:-}" ]]; then
         die "KEYSTORE_PASS not set and $PASS_FILE missing"
     fi
 fi
+# Passed to signing tools through the environment, never on the command line (visible in ps).
+export KEYSTORE_PASS
 
 if [[ ! -f "$KEYSTORE" ]]; then
     log "Creating upload key $KEYSTORE"
     mkdir -p "$(dirname "$KEYSTORE")"
     keytool -genkeypair -storetype PKCS12 -keystore "$KEYSTORE" \
-        -storepass "$KEYSTORE_PASS" -keypass "$KEYSTORE_PASS" -alias "$KEY_ALIAS" \
+        -storepass:env KEYSTORE_PASS -keypass:env KEYSTORE_PASS -alias "$KEY_ALIAS" \
         -keyalg RSA -keysize 4096 -validity 10000 -dname "CN=Photo Shrink Upload" >/dev/null 2>&1
 fi
 
@@ -95,7 +104,7 @@ log "Building APK"
 cp "$OUT/res.apk" "$OUT/unaligned.apk"
 zip -q -j "$OUT/unaligned.apk" "$OUT/classes.dex"
 zipalign -f -p 4 "$OUT/unaligned.apk" "$OUT/aligned.apk"
-apksigner sign --ks "$KEYSTORE" --ks-pass "pass:$KEYSTORE_PASS" --ks-key-alias "$KEY_ALIAS" \
+apksigner sign --ks "$KEYSTORE" --ks-pass env:KEYSTORE_PASS --ks-key-alias "$KEY_ALIAS" \
     --out "$OUT/$NAME.apk" "$OUT/aligned.apk"
 apksigner verify "$OUT/$NAME.apk"
 
@@ -106,7 +115,7 @@ mv "$OUT/module/AndroidManifest.xml" "$OUT/module/manifest/"
 cp "$OUT/classes.dex" "$OUT/module/dex/"
 (cd "$OUT/module" && zip -q -r ../base.zip .)
 java -jar "$BUNDLETOOL" build-bundle --modules="$OUT/base.zip" --output="$OUT/$NAME.aab"
-jarsigner -keystore "$KEYSTORE" -storepass "$KEYSTORE_PASS" -keypass "$KEYSTORE_PASS" \
+jarsigner -keystore "$KEYSTORE" -storepass:env KEYSTORE_PASS -keypass:env KEYSTORE_PASS \
     -sigalg SHA256withRSA -digestalg SHA-256 "$OUT/$NAME.aab" "$KEY_ALIAS" >/dev/null
 jarsigner -verify "$OUT/$NAME.aab" >/dev/null || die "AAB signature verification failed"
 java -jar "$BUNDLETOOL" validate --bundle="$OUT/$NAME.aab" >/dev/null
