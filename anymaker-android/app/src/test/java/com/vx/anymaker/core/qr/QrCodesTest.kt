@@ -20,7 +20,7 @@ class QrCodesTest {
     @Test
     fun wifiPayloadEscapesSpecialCharacters() {
         val p = QrContent.Wifi("Cafe;Net", "p:a\\ss", QrContent.Wifi.Security.WPA).payload()
-        assertEquals("WIFI:T:WPA;S:Cafe\;Net;P:p\\:a\\\\ss;;", p)
+        assertEquals("""WIFI:T:WPA;S:Cafe\;Net;P:p\:a\\ss;;""", p)
         assertEquals("WIFI:T:nopass;S:Open;H:true;;", QrContent.Wifi("Open", "ignored", QrContent.Wifi.Security.NONE, hidden = true).payload())
     }
 
