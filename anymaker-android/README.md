@@ -20,6 +20,15 @@ scripts/make-keystore.sh                # once: creates the upload key + keystor
 ./gradlew bundleRelease                 # app/build/outputs/bundle/release/app-release.aab
 ```
 
+## Signing without GitHub secrets
+Every push also publishes `anymaker-release-unsigned.aab`, `anymaker-debug.apk` and `mapping.txt` to the
+`anymaker-builds` branch. Sign the bundle offline with the upload key:
+
+```bash
+git fetch origin anymaker-builds && git show FETCH_HEAD:anymaker-release-unsigned.aab > app.aab
+jarsigner -keystore anymaker-upload.jks -sigalg SHA256withRSA -digestalg SHA-256 app.aab upload
+```
+
 ## Release signing
 The release build is signed when `keystore.properties` exists or these environment variables are set:
 `ANYMAKER_KEYSTORE` (path), `ANYMAKER_KEYSTORE_PASS`, `ANYMAKER_KEY_ALIAS`, optional `ANYMAKER_KEY_PASS`.
