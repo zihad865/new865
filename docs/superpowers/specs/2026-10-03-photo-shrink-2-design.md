@@ -27,7 +27,7 @@ Photo Shrink-কে নতুন নাম **Anymaker** দিয়ে এক�
 
 **ধরে নেওয়া (ইউজার এখনো নিশ্চিত করেননি):**
 1. আয়ের মডেল: অ্যাড + এককালীন Pro কেনা।
-2. Package `com.vx.photoshrink` আর `keystore/upload.jks` একই থাকবে, যাতে পুরোনো ইনস্টলে আপডেট যায়।
+2. অ্যাপটা আগে Play-তে upload হয়নি (ইউজার নিশ্চিত করেছেন), তাই নতুন package `com.vx.anymaker` আর নতুন upload key। প্রথম পাবলিক রিলিজ 1.0.0।
 3. সব সাব-প্রজেক্ট করা হবে।
 4. টার্গেট ইউজার গ্লোবাল (ইউজার নিশ্চিত করেছেন)। ডিফল্ট ভাষা ইংরেজি, ফোনের ভাষা অনুযায়ী অনুবাদ।
 
@@ -53,7 +53,7 @@ Photo Shrink-কে নতুন নাম **Anymaker** দিয়ে এক�
 **প্যাকেজ বিন্যাস** (একটাই Gradle module, প্যাকেজ দিয়ে ভাগ):
 
 ```
-com.vx.photoshrink
+com.vx.anymaker
 ├── core/image     Shrinker.java (অপরিবর্তিত), ImageIo, Exif, Dpi, Formats
 ├── core/pdf       PdfOps (PdfBox), PdfRender (PdfRenderer)
 ├── core/ocr       OcrEngine ইন্টারফেস → MlKitOcr (৫ লিপি), TesseractOcr (বাকি ভাষা)
@@ -117,7 +117,7 @@ com.vx.photoshrink
 - অ্যাপের ভেতরে রিভিউ চাওয়া (৩টা সফল কাজের পর, একবার)
 
 ### SP6: রিলিজ
-- নাম: "Anymaker: PDF, Photo & Scan" (২৭ অক্ষর); package `com.vx.photoshrink` অপরিবর্তিত, তাই পুরোনো ইউজাররা আপডেট পাবেন
+- নাম: "Anymaker: PDF, Photo & Scan" (২৭ অক্ষর); package `com.vx.anymaker` (প্রথম upload-এর পর আর বদলানো যায় না)
 - নতুন লোগো, Play icon ও feature graphic (`tools/make_assets.py` আপডেট)
 - ইংরেজি listing + উপরের ১০টা ভাষায় অনুবাদ করা listing ও স্ক্রিনশট, feature graphic
 - সব দেশে প্রকাশ (Play Console-এর সব দেশ ও অঞ্চল)
@@ -184,12 +184,12 @@ Picker / Share intent ─▶ Uri তালিকা ─▶ feature ViewModel
 
 | SP | নাম | নির্ভরতা | রিলিজ |
 |---|---|---|---|
-| SP0 | ভিত্তি: Gradle, Compose, ডিজাইন সিস্টেম, নেভিগেশন | — | 2.0.0-alpha (internal) |
-| SP1 | ফটো টুল + batch | SP0 | 2.0.0 (প্রথম পাবলিক আপডেট) |
-| SP2 | স্ক্যান, OCR, QR | SP0 | 2.1.0 |
-| SP3 | PDF | SP0, SP2 (searchable PDF) | 2.2.0 |
-| SP4 | AI ফটো | SP1 | 2.3.0 |
-| SP5 | Files, আয়, বহুভাষা | SP1 | 2.0.0 (SP1-এর সাথে একসাথে) |
+| SP0 | ভিত্তি: Gradle, Compose, ডিজাইন সিস্টেম, নেভিগেশন | — | 0.1.0 (internal) |
+| SP1 | ফটো টুল + batch | SP0 | 1.0.0 (প্রথম পাবলিক রিলিজ) |
+| SP2 | স্ক্যান, OCR, QR | SP0 | 1.1.0 |
+| SP3 | PDF | SP0, SP2 (searchable PDF) | 1.2.0 |
+| SP4 | AI ফটো | SP1 | 1.3.0 |
+| SP5 | Files, আয়, বহুভাষা | SP1 | 1.0.0 (SP1-এর সাথে একসাথে) |
 | SP6 | রিলিজ ও ASO | প্রতিটা রিলিজে | — |
 
 সুপারিশকৃত বাস্তব ক্রম: **SP0 → SP1 → SP5 → SP2 → SP3 → SP4**, যাতে প্রথম পাবলিক আপডেট থেকেই আয় শুরু হয়।
