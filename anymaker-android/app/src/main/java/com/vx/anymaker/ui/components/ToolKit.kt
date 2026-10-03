@@ -1,6 +1,5 @@
 package com.vx.anymaker.ui.components
 
-import androidx.compose.foundation.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -160,7 +159,6 @@ fun SaveShareRow(onSave: () -> Unit, onShare: () -> Unit, enabled: Boolean = tru
 }
 
 /** A wrapping row of single-choice chips. */
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun <T> ChoiceChips(options: List<T>, selected: T, label: @Composable (T) -> String, onSelect: (T) -> Unit, enabled: Boolean = true) {
     FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {

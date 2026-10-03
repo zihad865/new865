@@ -130,7 +130,7 @@ fun BatchScreen(onBack: () -> Unit, vm: BatchViewModel = viewModel()) {
 
     ToolScaffold(stringResource(R.string.tool_batch), onBack, snackbar, "screen_batch") {
         OutlinedButton(
-            onClick = { pick.launch(PickVisualMediaRequest(ActivityResultContracts.PickMultipleVisualMedia.ImageOnly)) },
+            onClick = { pick.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) },
             enabled = !vm.busy,
             modifier = Modifier.fillMaxWidth(),
         ) {
