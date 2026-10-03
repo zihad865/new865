@@ -32,7 +32,23 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.vx.anymaker.feature.batch.BatchScreen
+import com.vx.anymaker.feature.convert.ConvertScreen
+import com.vx.anymaker.feature.crop.CropScreen
+import com.vx.anymaker.feature.docscan.DocScanScreen
 import com.vx.anymaker.feature.files.FilesScreen
+import com.vx.anymaker.feature.ocr.OcrScreen
+import com.vx.anymaker.feature.passport.PassportScreen
+import com.vx.anymaker.feature.pdf.CompressPdfScreen
+import com.vx.anymaker.feature.pdf.ImagesToPdfScreen
+import com.vx.anymaker.feature.pdf.LockPdfScreen
+import com.vx.anymaker.feature.pdf.MergePdfScreen
+import com.vx.anymaker.feature.pdf.PdfEditScreen
+import com.vx.anymaker.feature.pdf.SplitPdfScreen
+import com.vx.anymaker.feature.qr.QrCreateScreen
+import com.vx.anymaker.feature.qr.QrScanScreen
+import com.vx.anymaker.feature.removebg.RemoveBgScreen
+import com.vx.anymaker.feature.signature.SignatureScreen
 import com.vx.anymaker.feature.home.HomeScreen
 import com.vx.anymaker.feature.resize.ResizeScreen
 import com.vx.anymaker.feature.resize.ResizeViewModel
@@ -111,6 +127,23 @@ fun AnymakerApp(resizeViewModel: ResizeViewModel) {
             composable(Routes.RESIZE) {
                 ResizeScreen(viewModel = resizeViewModel, onBack = { nav.popBackStack() })
             }
+            val back: () -> Unit = { nav.popBackStack() }
+            composable("batch") { BatchScreen(back) }
+            composable("crop") { CropScreen(back) }
+            composable("convert") { ConvertScreen(back) }
+            composable("remove_bg") { RemoveBgScreen(back) }
+            composable("passport") { PassportScreen(back) }
+            composable("doc_scan") { DocScanScreen(back) }
+            composable("ocr") { OcrScreen(back) }
+            composable("qr_scan") { QrScanScreen(back) }
+            composable("qr_create") { QrCreateScreen(back) }
+            composable("signature") { SignatureScreen(back) }
+            composable("images_to_pdf") { ImagesToPdfScreen(back) }
+            composable("pdf_edit") { PdfEditScreen(back) }
+            composable("pdf_merge") { MergePdfScreen(back) }
+            composable("pdf_split") { SplitPdfScreen(back) }
+            composable("pdf_compress") { CompressPdfScreen(back) }
+            composable("pdf_lock") { LockPdfScreen(back) }
         }
     }
 }

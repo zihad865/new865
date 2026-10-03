@@ -30,8 +30,10 @@ class ToolsTest {
     }
 
     @Test
-    fun onlyResizeShipsInFoundation() {
-        assertEquals(listOf("resize"), allTools.filter { it.available }.map { it.id })
+    fun everyToolShipsWithUniqueIdAndRoute() {
+        assertTrue(allTools.all { it.available })
         assertEquals(allTools.size, allTools.map { it.id }.toSet().size)
+        assertEquals(allTools.size, allTools.map { it.route }.toSet().size)
+        assertEquals(17, allTools.size)
     }
 }

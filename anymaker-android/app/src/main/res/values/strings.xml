@@ -104,7 +104,181 @@
     <string name="error_save_failed">Couldn\'t save the photo.</string>
     <string name="error_no_picker">No file app found. Use Share instead.</string>
 
+    <!-- Shared -->
+    <string name="share_chooser">Share</string>
+    <string name="message_saved_to">Saved to %1$s</string>
+    <string name="message_saved_some">Saved %1$s files</string>
+    <string name="action_choose_photo">Choose photo</string>
+    <string name="action_choose_photos">Choose photos</string>
+    <string name="action_choose_pdf">Choose PDF</string>
+    <string name="action_choose_pdfs">Choose PDFs</string>
+    <string name="action_take_photo">Take photo</string>
+    <string name="action_save_all">Save all</string>
+    <string name="action_share_all">Share all</string>
+    <string name="action_copy">Copy</string>
+    <string name="action_copied">Copied</string>
+    <string name="action_clear">Clear</string>
+    <string name="action_undo">Undo</string>
+    <string name="action_remove">Remove</string>
+    <string name="action_move_up">Move up</string>
+    <string name="action_move_down">Move down</string>
+    <string name="action_delete">Delete</string>
+    <string name="format_label">Format</string>
+    <string name="quality_label">Quality %1$d%%</string>
+    <string name="working">Working…</string>
+    <string name="working_progress">%1$d of %2$d…</string>
+    <string name="selected_count">%1$d selected</string>
+    <string name="result_summary">%1$d done · %2$s → %3$s</string>
+    <string name="result_failed">%1$d couldn\'t be converted</string>
+    <string name="size_before_after">%1$s → %2$s</string>
+    <string name="error_generic">Something went wrong. Please try again.</string>
+
+    <!-- Batch -->
+    <string name="batch_footer">Every photo gets the same size and KB limit. Results stay in the Files tab.</string>
+    <string name="batch_convert">Convert %1$d photos</string>
+
+    <!-- Crop -->
+    <string name="crop_ratio">Crop shape</string>
+    <string name="crop_free">Free</string>
+    <string name="crop_rotate_left">Rotate left</string>
+    <string name="crop_rotate_right">Rotate right</string>
+    <string name="crop_flip_h">Flip horizontal</string>
+    <string name="crop_flip_v">Flip vertical</string>
+    <string name="crop_apply">Crop and save</string>
+    <string name="crop_hint">Drag the frame to move it, drag a corner to resize.</string>
+
+    <!-- Convert -->
+    <string name="convert_run">Convert %1$d photos</string>
+    <string name="convert_footer">HEIC photos open on Android 9 and newer.</string>
+
+    <!-- Remove background -->
+    <string name="bg_background">Background</string>
+    <string name="bg_transparent">None</string>
+    <string name="bg_white">White</string>
+    <string name="bg_black">Black</string>
+    <string name="bg_blue">Blue</string>
+    <string name="bg_red">Red</string>
+    <string name="bg_green">Green</string>
+    <string name="bg_remove">Remove background</string>
+    <string name="bg_footer">Runs on this phone. The first use downloads a small model once.</string>
+
+    <!-- Passport -->
+    <string name="passport_country">Photo size</string>
+    <string name="passport_background">Background</string>
+    <string name="passport_keep">Keep</string>
+    <string name="passport_make">Make photo</string>
+    <string name="passport_sheet">4 × 6 in print sheet</string>
+    <string name="passport_single">Single photo</string>
+    <string name="passport_hint">Line up the face inside the frame: head centered, eyes about halfway up.</string>
+    <string name="passport_check">Always check your country\'s official rules before you submit.</string>
+
+    <!-- Document scan -->
+    <string name="docscan_start">Scan pages</string>
+    <string name="docscan_body">Point the camera at a document. Edges are found automatically; you can scan many pages into one PDF.</string>
+    <string name="docscan_pages">%1$d pages</string>
+    <string name="docscan_pdf">PDF</string>
+    <string name="docscan_images">Page images</string>
+    <string name="docscan_unavailable">The scanner needs Google Play services, which this phone doesn\'t have.</string>
+
+    <!-- OCR -->
+    <string name="ocr_script">Writing</string>
+    <string name="ocr_latin">Latin (English, Español, Français…)</string>
+    <string name="ocr_devanagari">Devanagari (हिन्दी)</string>
+    <string name="ocr_chinese">Chinese</string>
+    <string name="ocr_japanese">Japanese</string>
+    <string name="ocr_korean">Korean</string>
+    <string name="ocr_result">Text</string>
+    <string name="ocr_empty">No text found. Try a sharper, brighter photo.</string>
+    <string name="ocr_save_txt">Save as .txt</string>
+
+    <!-- QR scan -->
+    <string name="qr_scan_camera">Scan with camera</string>
+    <string name="qr_scan_photo">Scan from photo</string>
+    <string name="qr_none">No QR code or barcode found in this photo.</string>
+    <string name="qr_type_link">Link</string>
+    <string name="qr_type_wifi">Wi-Fi</string>
+    <string name="qr_type_phone">Phone</string>
+    <string name="qr_type_email">Email</string>
+    <string name="qr_type_text">Text</string>
+    <string name="qr_open_link">Open link</string>
+    <string name="qr_link_check">Check the full address before you open it.</string>
+    <string name="qr_call">Call</string>
+    <string name="qr_network">Network</string>
+    <string name="qr_password">Password</string>
+    <string name="qr_security">Security</string>
+
+    <!-- QR create -->
+    <string name="qr_content">Content</string>
+    <string name="qr_text_hint">Text or link</string>
+    <string name="qr_ssid">Network name</string>
+    <string name="qr_hidden">Hidden network</string>
+    <string name="qr_phone">Phone number</string>
+    <string name="qr_email">Email address</string>
+    <string name="qr_subject">Subject</string>
+    <string name="qr_message">Message</string>
+    <string name="qr_preview">QR code</string>
+
+    <!-- Signature -->
+    <string name="sign_draw">Draw</string>
+    <string name="sign_photo">From photo</string>
+    <string name="sign_ink">Ink</string>
+    <string name="sign_draw_hint">Sign inside the box with your finger.</string>
+    <string name="sign_threshold">Paper cleanup</string>
+    <string name="sign_save_png">Save PNG</string>
+
+    <!-- Images to PDF -->
+    <string name="pdf_page_size">Page size</string>
+    <string name="pdf_size_a4">A4</string>
+    <string name="pdf_size_letter">Letter</string>
+    <string name="pdf_size_fit">Fit photo</string>
+    <string name="pdf_margin">White margin</string>
+    <string name="pdf_create">Create PDF</string>
+    <string name="pdf_pages_label">Page %1$d</string>
+
+    <!-- PDF tools -->
+    <string name="pdf_merge_run">Merge %1$d PDFs</string>
+    <string name="pdf_split_mode">Split</string>
+    <string name="pdf_split_ranges">Pick pages</string>
+    <string name="pdf_split_every">Every page</string>
+    <string name="pdf_split_pages_hint">Pages, e.g. 1-3, 5</string>
+    <string name="pdf_split_run">Split PDF</string>
+    <string name="pdf_info">%1$s · %2$d pages</string>
+    <string name="pdf_compress_level">Compression</string>
+    <string name="pdf_compress_low">Light</string>
+    <string name="pdf_compress_medium">Balanced</string>
+    <string name="pdf_compress_high">Strong</string>
+    <string name="pdf_compress_run">Compress PDF</string>
+    <string name="pdf_compress_footer">Shrinks the photos inside the PDF. Text stays sharp.</string>
+    <string name="pdf_lock_password">Password</string>
+    <string name="pdf_lock_confirm">Repeat password</string>
+    <string name="pdf_lock_mismatch">Passwords don\'t match</string>
+    <string name="pdf_lock_run">Add password</string>
+    <string name="pdf_unlock_run">Remove password</string>
+    <string name="pdf_locked_status">This PDF has a password. Enter it to remove it.</string>
+    <string name="pdf_unlocked_status">This PDF has no password. Add one to protect it.</string>
+    <string name="pdf_wrong_password">Wrong password, or this PDF is password-protected. Use Lock PDF to remove the password first.</string>
+    <string name="pdf_lock_footer">Keep the password safe. It can\'t be recovered.</string>
+
+    <!-- PDF edit -->
+    <string name="edit_text">Text</string>
+    <string name="edit_highlight">Highlight</string>
+    <string name="edit_whiteout">Whiteout</string>
+    <string name="edit_image">Image</string>
+    <string name="edit_text_hint">Type the text, then tap the page where it goes.</string>
+    <string name="edit_box_hint">Drag on the page to draw the box.</string>
+    <string name="edit_image_hint">Choose an image (for example your signature), then tap where it goes.</string>
+    <string name="edit_text_size">Size %1$d pt</string>
+    <string name="edit_save">Save PDF</string>
+    <string name="edit_page_of">Page %1$d of %2$d</string>
+    <string name="edit_prev">Previous page</string>
+    <string name="edit_next">Next page</string>
+    <string name="edit_count">%1$d changes</string>
+    <string name="edit_limits">Existing text can\'t be retyped; cover it with Whiteout and add new text on top.</string>
+
     <!-- Files -->
+    <string name="files_count">%1$d files</string>
+
+    <!-- Files (empty state) -->
     <string name="files_empty_title">No files yet</string>
     <string name="files_empty_body">Photos and PDFs you make will appear here.</string>
 

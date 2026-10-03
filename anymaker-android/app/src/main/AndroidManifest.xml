@@ -24,6 +24,11 @@
             </intent-filter>
         </activity>
 
+        <!-- Ask Play services to fetch the on-device ML models at install time. -->
+        <meta-data
+            android:name="com.google.mlkit.vision.DEPENDENCIES"
+            android:value="ocr,barcode,subject_segment" />
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.files"

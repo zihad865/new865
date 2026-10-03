@@ -96,6 +96,21 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.kotlinx.coroutines.play.services)
+
+    // On-device ML through Google Play services: models download once, nothing is uploaded.
+    implementation(libs.mlkit.document.scanner)
+    implementation(libs.mlkit.code.scanner)
+    implementation(libs.mlkit.barcode)
+    implementation(libs.mlkit.text)
+    implementation(libs.mlkit.text.devanagari)
+    implementation(libs.mlkit.text.chinese)
+    implementation(libs.mlkit.text.japanese)
+    implementation(libs.mlkit.text.korean)
+    implementation(libs.mlkit.subject.segmentation)
+
+    implementation(libs.zxing.core)
+    implementation(libs.pdfbox.android)
 
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)
