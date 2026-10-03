@@ -75,7 +75,7 @@ class CropViewModel(app: Application) : ToolViewModel(app) {
         crop = CropRect.centered(bmp.width, bmp.height, shape.ratio)
     }
 
-    fun setShape(s: CropShape) {
+    fun chooseShape(s: CropShape) {
         shape = s
         bitmap?.let { crop = CropRect.centered(it.width, it.height, s.ratio) }
     }
@@ -134,7 +134,7 @@ fun CropScreen(onBack: () -> Unit, vm: CropViewModel = viewModel()) {
             }
             SectionCard(title = stringResource(R.string.crop_ratio)) {
                 Row(Modifier.padding(16.dp)) {
-                    ChoiceChips(CropShape.entries, vm.shape, { if (it == CropShape.FREE) stringResource(R.string.crop_free) else it.label }, vm::setShape, !vm.busy)
+                    ChoiceChips(CropShape.entries, vm.shape, { if (it == CropShape.FREE) stringResource(R.string.crop_free) else it.label }, vm::chooseShape, !vm.busy)
                 }
             }
             SectionCard(title = stringResource(R.string.format_label)) {
