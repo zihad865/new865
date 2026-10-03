@@ -1,4 +1,4 @@
-# Google Play release checklist: Anymaker 0.1.0
+# Google Play release checklist: Anymaker 1.0.0
 
 ## Files
 | What | Where |
@@ -13,35 +13,46 @@
 
 Regenerate the graphics with `python3 tools/make_store_assets.py` (needs Pillow).
 
-## Store listing (this version only ships Resize & Compress)
-List only what the build does. Add PDF, scan and other features to the title and description when those versions ship.
+## Store listing
 
-**App name (≤30):** `Anymaker: Photo Resizer & KB`
+**App name (≤30):** `Anymaker: PDF, Photo & Scan`
 
 **Short description (≤80):**
-`Resize photos to any pixel size and compress under any KB with the best quality.`
+`Resize photos to any KB, scan documents and text, edit PDFs, make QR codes.`
 
 **Full description:**
 ```
-Anymaker resizes any photo to the exact pixels you need and compresses it under your KB limit, keeping the highest quality that fits.
+Anymaker puts the photo, scan and PDF tools you need for forms, work and school in one app. Everything runs on your phone.
 
-• Any size: 1000×1000, 600×600 passport, 300×80 signature, or your own
-• Any limit: 100 KB, 50 KB, 20 KB, whatever the form or website asks for
-• Best quality: finds the highest quality that fits under your limit and shows a quality grade
-• Never reduce pixels: keep the exact resolution you asked for
-• Lock settings: set once and every photo you choose or share converts automatically
-• JPG or WEBP
-• Save to your gallery or share to any app
-• Light and dark mode
-• Works offline. No account, no upload, no permissions.
+PHOTO
+• Resize & Compress: any pixel size, any KB limit, the best quality that fits
+• Batch: convert up to 100 photos at once with the same settings
+• Crop & Rotate: free or fixed shapes (1:1, 4:3, 16:9…), rotate and flip
+• Convert: JPG, PNG and WEBP; opens HEIC photos
+• Remove Background: transparent PNG or a new color
+• Passport Photo: common sizes (US 2×2 in, UK/EU/Schengen 35×45 mm, Canada, China and more) with a white or blue background and a 4×6 in print sheet
 
-Perfect for job and university applications, visa and passport forms, and any website with an upload limit.
+SCAN
+• Scan Document: automatic edges, many pages into one PDF
+• Scan Text: copy text from photos (Latin, Devanagari, Chinese, Japanese, Korean)
+• Scan QR: QR codes and barcodes from the camera or a photo; see the full link before opening
+• Create QR: links, text, Wi-Fi, phone and email
+• Signature: draw it or clean up a photo of your signature into a transparent PNG
+
+PDF
+• Images to PDF: A4, Letter or photo size
+• Edit PDF: add text, highlights, whiteout and images such as your signature
+• Merge, Split and Compress PDF
+• Lock PDF: add or remove a password
+
+Files tab: everything you make in one place, ready to save or share.
+No account. No ads. Your files are never uploaded.
 ```
 
-**Category:** Photography · **Tags:** photo resizer, image compressor, KB
+**Category:** Productivity · **Tags:** PDF, scanner, photo resizer
 
 ## Play Console answers
-- **Data safety:** No data collected. No data shared.
+- **Data safety:** The app itself collects and shares no data. Google Play services (ML Kit) may collect diagnostics; follow Google's ML Kit Data safety guidance (https://developers.google.com/ml-kit/android-data-disclosure) when filling the form.
 - **Ads:** No, this app does not contain ads.
 - **Content rating:** complete the questionnaire; no objectionable content (Everyone / PEGI 3).
 - **Target audience:** 18+ (keeps the app outside the Families policy).

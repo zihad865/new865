@@ -29,8 +29,8 @@ TEAL_DEEP = (8, 70, 66)
 INK = (20, 35, 46)
 WHITE = (255, 255, 255)
 # Only features that ship in the current release: Play rejects listings that promise more.
-TAGLINE = "Resize and compress photos to any KB. Offline."
-CHIPS = ["Any pixel size", "Any KB limit", "Best quality", "No upload"]
+TAGLINE = "Photo, scan and PDF tools on your phone."
+CHIPS = ["Resize & Compress", "Scan Documents", "Scan Text", "QR Codes", "PDF Tools", "Remove Background", "Passport Photos"]
 SS = 4  # supersampling factor for smooth curves
 
 

@@ -1,12 +1,13 @@
 # Anymaker (Android)
 
-Photo, scan and PDF tools that work offline. Version 0.1.0 ships the foundation and **Resize & Compress**:
-any pixel size, any KB limit, the highest quality that fits, lock settings, save and share.
+Photo, scan and PDF tools on the phone. Version 1.0.0 ships 17 tools:
+Resize & Compress, Batch, Crop & Rotate, Convert, Remove Background, Passport Photo, Scan Document,
+Scan Text, Scan QR, Create QR, Signature, Images to PDF, Edit PDF, Merge PDF, Split PDF, Compress PDF and Lock PDF.
 The design and the roadmap for the other tools are in `../docs/superpowers/specs/2026-10-03-photo-shrink-2-design.md`.
 
 - Kotlin, Jetpack Compose, Material 3; minSdk 24, targetSdk 36
 - Package `com.vx.anymaker`
-- No permissions, no network, no analytics
+- No runtime permissions, no analytics, no ads; ML features run on device through Google Play services
 
 ## Build
 CI builds everything: push to GitHub and download the artifacts from the **Anymaker Android** workflow run.
