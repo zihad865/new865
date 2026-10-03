@@ -15,7 +15,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.platform.LocalContext
+import androidx.activity.compose.LocalActivity
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.mlkit.vision.documentscanner.GmsDocumentScannerOptions
@@ -56,7 +56,7 @@ class DocScanViewModel(app: Application) : ToolViewModel(app) {
 fun DocScanScreen(onBack: () -> Unit, vm: DocScanViewModel = viewModel()) {
     val snackbar = remember { SnackbarHostState() }
     val export = rememberExportController(snackbar)
-    val activity = LocalContext.current as? Activity
+    val activity = LocalActivity.current
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { r ->
         if (r.resultCode == Activity.RESULT_OK) vm.onResult(GmsDocumentScanningResult.fromActivityResultIntent(r.data))
     }
