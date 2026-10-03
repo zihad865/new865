@@ -14,6 +14,9 @@ concurrency:
   group: anymaker-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -60,6 +63,25 @@ jobs:
         run: |
           jarsigner -verify app/build/outputs/bundle/release/app-release.aab | tail -1
           "$ANDROID_HOME/build-tools/37.0.0/apksigner" verify --print-certs app/build/outputs/apk/release/app-release.apk | head -3
+
+      # Unsigned bundle and debug APK go to an orphan branch so they can be fetched with plain git
+      # and signed offline with the upload key, without storing the key in GitHub.
+      - name: Publish build outputs to the anymaker-builds branch
+        if: github.event_name == 'push'
+        run: |
+          out="$RUNNER_TEMP/builds"
+          mkdir -p "$out"
+          cp app/build/outputs/bundle/release/app-release.aab "$out/anymaker-release-unsigned.aab"
+          cp app/build/outputs/apk/debug/app-debug.apk "$out/anymaker-debug.apk"
+          cp app/build/outputs/mapping/release/mapping.txt "$out/mapping.txt"
+          echo "${GITHUB_SHA}" > "$out/SOURCE_COMMIT"
+          cd "$out"
+          git init -q -b anymaker-builds
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -q -m "Anymaker build of ${GITHUB_SHA}"
+          git push -q -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${GITHUB_REPOSITORY}.git" anymaker-builds
 
       - name: Upload test reports
         if: failure()
