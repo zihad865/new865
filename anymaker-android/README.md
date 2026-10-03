@@ -11,7 +11,7 @@ The design and the roadmap for the other tools are in `../docs/superpowers/specs
 ## Build
 CI builds everything: push to GitHub and download the artifacts from the **Anymaker Android** workflow run.
 
-Locally (needs JDK 21 and the Android SDK with platform 36):
+Locally (needs JDK 21 and the Android SDK with platform 37):
 
 ```bash
 ./gradlew testDebugUnitTest lintDebug   # tests (Robolectric) and lint

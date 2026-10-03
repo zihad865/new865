@@ -59,7 +59,7 @@ jobs:
         if: env.ANYMAKER_KEYSTORE != ''
         run: |
           jarsigner -verify app/build/outputs/bundle/release/app-release.aab | tail -1
-          "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --print-certs app/build/outputs/apk/release/app-release.apk | head -3
+          "$ANDROID_HOME/build-tools/37.0.0/apksigner" verify --print-certs app/build/outputs/apk/release/app-release.apk | head -3
 
       - name: Upload test reports
         if: failure()

@@ -23,7 +23,7 @@ val canSignRelease = releaseStoreFile != null && releaseStorePassword != null
 
 android {
     namespace = "com.vx.anymaker"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.vx.anymaker"
