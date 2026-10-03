@@ -4,7 +4,7 @@
 
 ## ১. লক্ষ্য
 
-Photo Shrink-কে একটা অফলাইন "ফটো + স্ক্যান + PDF" অল-ইন-ওয়ান টুলে পরিণত করা, যেটা বাংলাদেশের চাকরি, ভর্তি আর অফিসের কাগজপত্রের কাজ এক অ্যাপে সারে, আর অ্যাড ও Pro কেনা থেকে আয় করে।
+Photo Shrink-কে একটা অফলাইন "ফটো + স্ক্যান + PDF" অল-ইন-ওয়ান টুলে পরিণত করা, যেটা সারা বিশ্বের ইউজারদের পাসপোর্ট, ভিসা, চাকরি, ভর্তি আর অফিসের কাগজপত্রের কাজ এক অ্যাপে সারে, আর অ্যাড ও Pro কেনা থেকে আয় করে।
 
 **সফলতার মাপকাঠি**
 - প্রতিটা টুল ইন্টারনেট ছাড়া কাজ করে। ইন্টারনেট লাগে শুধু অ্যাড আর একবারের মডেল ডাউনলোডে।
@@ -29,6 +29,7 @@ Photo Shrink-কে একটা অফলাইন "ফটো + স্ক্য
 1. আয়ের মডেল: অ্যাড + এককালীন Pro কেনা।
 2. Package `com.vx.photoshrink` আর `keystore/upload.jks` একই থাকবে, যাতে পুরোনো ইনস্টলে আপডেট যায়।
 3. সব সাব-প্রজেক্ট করা হবে।
+4. টার্গেট ইউজার গ্লোবাল (ইউজার নিশ্চিত করেছেন)। ডিফল্ট ভাষা ইংরেজি, ফোনের ভাষা অনুযায়ী অনুবাদ।
 
 ## ৩. পদ্ধতি বাছাই
 
@@ -55,7 +56,7 @@ Photo Shrink-কে একটা অফলাইন "ফটো + স্ক্য
 com.vx.photoshrink
 ├── core/image     Shrinker.java (অপরিবর্তিত), ImageIo, Exif, Dpi, Formats
 ├── core/pdf       PdfOps (PdfBox), PdfRender (PdfRenderer)
-├── core/ocr       OcrEngine ইন্টারফেস → MlKitOcr (ইংরেজি), TesseractOcr (বাংলা)
+├── core/ocr       OcrEngine ইন্টারফেস → MlKitOcr (৫ লিপি), TesseractOcr (বাকি ভাষা)
 ├── core/ml        Segmenter (ML Kit Subject Segmentation)
 ├── core/jobs      BatchWorker, JobRepository
 ├── core/data      Room DB (History), DataStore (Settings, Presets)
@@ -70,7 +71,8 @@ com.vx.photoshrink
 
 ### SP1: ফটো টুল
 - রিসাইজ + KB কম্প্রেস (এখনকার অ্যালগরিদম), Lock Settings
-- Preset: পাসপোর্ট 300×300 · 100KB, সিগনেচার 300×80 · 60KB, BD সরকারি চাকরি (ছবি 300×300 · 100KB, সই 300×80 · 60KB), ভর্তি ফর্ম; নিজের preset সেভ
+- দেশভিত্তিক পাসপোর্ট/ভিসা preset: US ও India 2×2 in (600×600 px), UK/EU/Schengen 35×45 mm, Canada 50×70 mm, China 33×48 mm, Australia 35×45 mm; ফোনের দেশ অনুযায়ী আগে দেখায়
+- সাধারণ preset: সই 300×80 · 60KB, ইমেইল অ্যাটাচমেন্ট (1600px · 500KB), সোশ্যাল (1080×1080), ওয়েবসাইট (WEBP 1200px · 200KB), সরকারি চাকরি/ভর্তি ফর্ম (দেশ অনুযায়ী); নিজের preset সেভ
 - Batch: ১–৫০০ ছবি, `SEND_MULTIPLE`, এক সেটিংসে সব, ZIP বা গ্যালারিতে সেভ
 - এডিট: crop (ফ্রি, 1:1, 3:4, 35×45mm), rotate, flip, brightness/contrast
 - ফরম্যাট: আউটপুট JPG/PNG/WEBP; ইনপুট HEIC/HEIF (API 28+, নিচে স্পষ্ট বার্তা)
@@ -79,7 +81,7 @@ com.vx.photoshrink
 
 ### SP2: স্ক্যান
 - **ডকুমেন্ট স্ক্যানার:** ML Kit Document Scanner (কিনারা খোঁজা, crop, filter, বহু পাতা, সরাসরি PDF); ক্যামেরা permission লাগে না
-- **টেক্সট স্ক্যান (OCR):** ইংরেজি → ML Kit Text Recognition v2 (অন-ডিভাইস)। বাংলা → Tesseract4Android + `ben` ডেটা, প্রথম ব্যবহারে ডাউনলোড (ML Kit বাংলা লিপি সমর্থন করে না)। ফল: কপি, শেয়ার, `.txt`, searchable PDF
+- **টেক্সট স্ক্যান (OCR):** ল্যাটিন (ইংরেজি, স্প্যানিশ, পর্তুগিজ, ফরাসি, জার্মান, ইন্দোনেশিয়ান, তুর্কি, ভিয়েতনামি ইত্যাদি), চাইনিজ, দেবনাগরী (হিন্দি, মারাঠি, নেপালি), জাপানি, কোরিয়ান → ML Kit Text Recognition v2 (অন-ডিভাইস)। ML Kit যেগুলো পারে না (আরবি, বাংলা, রুশ, থাই, তামিল ইত্যাদি) → Tesseract4Android, প্রতিটা ভাষার ডেটা প্রথম ব্যবহারে ডাউনলোড। ফল: কপি, শেয়ার, `.txt`, searchable PDF
 - **QR/বারকোড:** ML Kit Code Scanner দিয়ে স্ক্যান (ক্যামেরা permission লাগে না), গ্যালারির ছবি থেকেও; ZXing দিয়ে QR বানানো (লিংক, Wi-Fi, টেক্সট, ফোন); স্ক্যান history; লিংক খোলার আগে পুরো URL দেখানো
 
 ### SP3: PDF
@@ -99,16 +101,18 @@ com.vx.photoshrink
 
 ### SP5: Files, আয়, ভাষা
 - Files ট্যাব: সব আউটপুটের history, খোঁজা, আবার শেয়ার, মুছে ফেলা
-- বাংলা + ইংরেজি UI (ফোনের ভাষা অনুযায়ী, Settings থেকে বদলানো যায়)
+- বহুভাষী UI: ডিফল্ট ইংরেজি; লঞ্চে স্প্যানিশ, পর্তুগিজ (ব্রাজিল), হিন্দি, ইন্দোনেশিয়ান, আরবি (RTL), রুশ, তুর্কি, ভিয়েতনামি, ফরাসি, বাংলা; ফোনের ভাষা অনুযায়ী, Settings থেকে বদলানো যায় (Android 13+ per-app language)
+- দাম: Play Console-এর দেশভিত্তিক মূল্য (local pricing)
 - AdMob: Files তালিকায় native ad; ফলাফল স্ক্রিনে banner; interstitial শুধু কাজ শেষে, প্রতি ৩টা কাজে সর্বোচ্চ ১টা, আগেরটার পর অন্তত ৬০ সেকেন্ড; কোনো বোতামের গায়ে অ্যাড নয়
-- UMP consent (GDPR/EEA), অ্যাড ছাড়া অ্যাপ পুরোপুরি চলে
+- UMP consent: EEA/UK-এ GDPR আর US রাজ্যের প্রাইভেসি আইন (CCPA ইত্যাদি) মেনে; Settings-এ "Privacy options"; অ্যাড ছাড়া অ্যাপ পুরোপুরি চলে
 - Pro (এককালীন): অ্যাড নেই, batch সীমা নেই (ফ্রি: ১০টা), PDF সই ও পাসওয়ার্ড, 4×6 প্রিন্ট শিট
 - Rewarded ad দেখে একবার Pro কাজ
 - অ্যাপের ভেতরে রিভিউ চাওয়া (৩টা সফল কাজের পর, একবার)
 
 ### SP6: রিলিজ
 - নাম: "Photo Shrink: PDF & Scanner" (২৭ অক্ষর)
-- বাংলা + ইংরেজি listing, ৮টা স্ক্রিনশট, feature graphic
+- ইংরেজি listing + উপরের ১০টা ভাষায় অনুবাদ করা listing ও স্ক্রিনশট, feature graphic
+- সব দেশে প্রকাশ (Play Console-এর সব দেশ ও অঞ্চল)
 - Data safety: অ্যাড ID ও ডিভাইস তথ্য (AdMob), ছবি ডিভাইসেই থাকে
 - `PRIVACY.md` আপডেট, closed test (১২ জন, ১৪ দিন), তারপর production
 
@@ -118,7 +122,7 @@ com.vx.photoshrink
 - **Tools হোম:** উপরে সার্চ বার আর "সাম্প্রতিক preset" chip; নিচে তিন সেকশনের grid: ফটো, স্ক্যান, PDF। প্রতিটা টাইলে আইকন + এক লাইনের কাজ
 - **প্রতিটা টুলের ধাপ:** ফাইল বাছাই → সেটিংস (bottom sheet) → প্রসেস (progress) → ফলাফল
 - **কমন ফলাফল স্ক্রিন:** preview, আগের/পরের সাইজ, Save · Share · আরেকটা টুলে পাঠানো (যেমন "PDF বানাও")
-- **থিম:** Material You dynamic color (Android 12+), নিচে ব্র্যান্ড রং; light/dark; বাংলা ফন্ট Noto Sans Bengali, ইংরেজি Plus Jakarta Sans (অ্যাপে বান্ডল করা)
+- **থিম:** Material You dynamic color (Android 12+), নিচে ব্র্যান্ড রং; light/dark; ইংরেজি Plus Jakarta Sans (অ্যাপে বান্ডল করা), অন্য লিপিতে সিস্টেমের Noto ফন্ট; আরবির জন্য পুরো RTL লেআউট
 - **অ্যাক্সেসিবিলিটি:** 48dp টাচ টার্গেট, TalkBack লেবেল, ফন্ট ২০০% পর্যন্ত বড় করলেও লেআউট ভাঙবে না
 - **গতি:** কাজ শুরুর < ১০০ms-এ সাড়া, ভারী কাজ সবসময় background thread-এ
 
@@ -152,7 +156,7 @@ Picker / Share intent ─▶ Uri তালিকা ─▶ feature ViewModel
 
 - **JVM unit:** preset মাপ, `Shrinker.targetSize`, ফাইলনাম, ZIP, অ্যাড-ফ্রিকোয়েন্সি নিয়ম, Pro সীমা
 - **Robolectric:** ViewModel ও DataStore
-- **Instrumented (emulator):** KB লিমিট golden test (১০টা নমুনা ছবি × ৫টা লিমিট), PDF merge/split/encrypt, OCR নমুনা (ইংরেজি ও বাংলা), batch ৫০ ছবি
+- **Instrumented (emulator):** KB লিমিট golden test (১০টা নমুনা ছবি × ৫টা লিমিট), PDF merge/split/encrypt, OCR নমুনা (ইংরেজি, হিন্দি, আরবি, বাংলা), RTL স্ক্রিনশট টেস্ট (আরবি), batch ৫০ ছবি
 - **Compose UI test:** হোম → রিসাইজ → সেভ; batch progress; ভাষা বদল
 - প্রতিটা SP শেষে `./gradlew test lint` সবুজ
 
@@ -162,7 +166,7 @@ Picker / Share intent ─▶ Uri তালিকা ─▶ feature ViewModel
 |---|---|
 | এই cloud container-এ `dl.google.com` ব্লক (Google Maven) | environment-এ `dl.google.com` ও `maven.google.com` allow করা, অথবা নিজের PC-তে বিল্ড |
 | PdfBox-Android-এর শেষ রিলিজ 2.0.27.0 (জানুয়ারি 2023) | `core/pdf` ইন্টারফেসের পেছনে রাখা, যাতে পরে বদলানো যায়; ব্যাপক PDF টেস্ট |
-| বাংলা OCR-এর নির্ভুলতা মাঝারি | ছবি আগে grayscale + threshold; ফল এডিটযোগ্য রাখা |
+| Tesseract-ভিত্তিক ভাষায় (আরবি, বাংলা ইত্যাদি) OCR-এর নির্ভুলতা মাঝারি | ছবি আগে grayscale + threshold; ফল এডিটযোগ্য রাখা |
 | Tesseract native lib অ্যাপ বড় করে | App Bundle ABI split; ভাষার ডেটা চাহিদামতো ডাউনলোড |
 | Play অ্যাড নীতি | উপরের অ্যাড নিয়ম কোডে test দিয়ে বাঁধা |
 
@@ -177,7 +181,7 @@ Picker / Share intent ─▶ Uri তালিকা ─▶ feature ViewModel
 | SP2 | স্ক্যান, OCR, QR | SP0 | 2.1.0 |
 | SP3 | PDF | SP0, SP2 (searchable PDF) | 2.2.0 |
 | SP4 | AI ফটো | SP1 | 2.3.0 |
-| SP5 | Files, আয়, বাংলা | SP1 | 2.0.0 (SP1-এর সাথে একসাথে) |
+| SP5 | Files, আয়, বহুভাষা | SP1 | 2.0.0 (SP1-এর সাথে একসাথে) |
 | SP6 | রিলিজ ও ASO | প্রতিটা রিলিজে | — |
 
 সুপারিশকৃত বাস্তব ক্রম: **SP0 → SP1 → SP5 → SP2 → SP3 → SP4**, যাতে প্রথম পাবলিক আপডেট থেকেই আয় শুরু হয়।
