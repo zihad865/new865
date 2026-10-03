@@ -32,9 +32,11 @@ class HomeScreenTest {
         show()
         compose.onNodeWithText("Photo").assertIsDisplayed()
         compose.onNodeWithText("Resize").assertIsDisplayed()
+        // A lazy grid only composes what is on screen, so check each header after scrolling to it.
+        compose.onNodeWithTag("home_grid").performScrollToNode(hasTestTag("tool_qr_scan"))
+        compose.onNodeWithText("Scan").assertIsDisplayed()
         compose.onNodeWithTag("home_grid").performScrollToNode(hasTestTag("tool_pdf_lock"))
-        compose.onNodeWithText("PDF").assertExists()
-        compose.onNodeWithText("Scan").assertExists()
+        compose.onNodeWithText("PDF").assertIsDisplayed()
     }
 
     @Test
