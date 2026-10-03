@@ -57,27 +57,26 @@ fun DocScanScreen(onBack: () -> Unit, vm: DocScanViewModel = viewModel()) {
     val snackbar = remember { SnackbarHostState() }
     val export = rememberExportController(snackbar)
     val activity = LocalContext.current as? Activity
-    val scanner = remember {
-        GmsDocumentScanning.getClient(
-            GmsDocumentScannerOptions.Builder()
-                .setGalleryImportAllowed(true)
-                .setPageLimit(100)
-                .setResultFormats(GmsDocumentScannerOptions.RESULT_FORMAT_JPEG, GmsDocumentScannerOptions.RESULT_FORMAT_PDF)
-                .setScannerMode(GmsDocumentScannerOptions.SCANNER_MODE_FULL)
-                .build(),
-        )
-    }
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { r ->
         if (r.resultCode == Activity.RESULT_OK) vm.onResult(GmsDocumentScanningResult.fromActivityResultIntent(r.data))
     }
     val start = {
         if (activity == null) {
             vm.onUnavailable()
-        } else {
+        } else runCatching {
+            // Created on tap, not on screen open, so the screen works even without Play services.
+            val scanner = GmsDocumentScanning.getClient(
+                GmsDocumentScannerOptions.Builder()
+                    .setGalleryImportAllowed(true)
+                    .setPageLimit(100)
+                    .setResultFormats(GmsDocumentScannerOptions.RESULT_FORMAT_JPEG, GmsDocumentScannerOptions.RESULT_FORMAT_PDF)
+                    .setScannerMode(GmsDocumentScannerOptions.SCANNER_MODE_FULL)
+                    .build(),
+            )
             scanner.getStartScanIntent(activity)
                 .addOnSuccessListener { sender -> launcher.launch(IntentSenderRequest.Builder(sender).build()) }
                 .addOnFailureListener { vm.onUnavailable() }
-        }
+        }.onFailure { vm.onUnavailable() }
         Unit
     }
 

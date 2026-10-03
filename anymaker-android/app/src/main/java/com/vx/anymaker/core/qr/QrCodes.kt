@@ -45,7 +45,7 @@ sealed interface QrContent {
 
     companion object {
         /** Wi-Fi QR fields escape \ ; , : and " with a backslash. */
-        fun escape(s: String): String = s.replace(Regex("""([\;,:"])"""), """\\$1""")
+        fun escape(s: String): String = s.replace(Regex("""([\\;,:"])"""), """\\$1""")
     }
 }
 
