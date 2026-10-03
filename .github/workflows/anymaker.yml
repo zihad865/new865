@@ -38,7 +38,11 @@ jobs:
         run: ./gradlew --stacktrace testDebugUnitTest
 
       - name: Lint
-        run: ./gradlew --stacktrace lintDebug
+        run: ./gradlew lintDebug
+
+      - name: Show lint errors
+        if: failure()
+        run: grep -h -A3 "Error:" app/build/reports/lint-results-debug.txt || true
 
       - name: Decode upload key
         env:

@@ -1,5 +1,6 @@
 package com.vx.anymaker.core.pdf
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Color
@@ -256,6 +257,8 @@ class PdfTools(private val context: Context) {
         }
     }
 
+    // Font files are stored uncompressed like raw resources, so openRawResource reads them directly.
+    @SuppressLint("ResourceType")
     private fun loadFont(doc: PDDocument): PDFont =
         context.resources.openRawResource(R.font.plusjakartasans_regular).use { PDType0Font.load(doc, it) }
 
