@@ -68,6 +68,13 @@ android {
         compose = true
     }
 
+    lint {
+        // Print every finding in the CI log, not just the first.
+        textReport = true
+        textOutput = file("stdout")
+        warningsAsErrors = false
+    }
+
     testOptions {
         unitTests {
             isIncludeAndroidResources = true

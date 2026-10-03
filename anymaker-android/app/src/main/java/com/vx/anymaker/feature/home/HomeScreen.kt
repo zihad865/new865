@@ -35,7 +35,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -54,9 +54,9 @@ fun HomeScreen(
     modifier: Modifier = Modifier,
     tools: List<Tool> = allTools,
 ) {
-    val context = LocalContext.current
+    val resources = LocalResources.current
     var query by rememberSaveable { mutableStateOf("") }
-    val visible = filterTools(tools, query) { context.getString(it.title) }
+    val visible = filterTools(tools, query) { resources.getString(it.title) }
 
     LazyVerticalGrid(
         columns = GridCells.Adaptive(minSize = 96.dp),

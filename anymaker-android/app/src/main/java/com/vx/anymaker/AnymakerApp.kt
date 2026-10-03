@@ -23,7 +23,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -55,7 +55,7 @@ fun AnymakerApp(resizeViewModel: ResizeViewModel) {
     val current = backStack?.destination?.route
     val snackbar = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
-    val context = LocalContext.current
+    val resources = LocalResources.current
 
     // A photo shared from another app opens the resize screen.
     val resizeState by resizeViewModel.state.collectAsStateWithLifecycle()
@@ -98,10 +98,10 @@ fun AnymakerApp(resizeViewModel: ResizeViewModel) {
                     if (route != null) {
                         nav.navigate(route) { launchSingleTop = true }
                     } else {
-                        val name = context.getString(tool.title)
+                        val name = resources.getString(tool.title)
                         scope.launch {
                             snackbar.currentSnackbarData?.dismiss()
-                            snackbar.showSnackbar(context.getString(R.string.coming_soon_message, name))
+                            snackbar.showSnackbar(resources.getString(R.string.coming_soon_message, name))
                         }
                     }
                 })
