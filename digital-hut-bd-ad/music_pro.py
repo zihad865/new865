@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """Production music bed for the Digital Hut BD ad.
 
-Composes an uplifting corporate/tech track (C major, I-V-vi-IV, 118 BPM) as
+Composes an uplifting corporate/tech track (C major, I-V-vi-IV, 125 BPM) as
 MIDI, renders each instrument separately through FluidSynth with the FluidR3
 GM soundfont (MIT licence), then mixes the stems with Spotify Pedalboard:
 per-stem EQ/compression/reverb, kick sidechain on the sustained parts, and a
 master bus glue compressor + limiter. Downbeats are placed so the drop lands
-on the scene-2 cut (4.2 s) and the big lift lands on the features scene.
+on the scene-2 cut and the big lift lands on the features scene (timeline.py).
 """
 import argparse
 import logging
@@ -25,12 +25,15 @@ from pedalboard import (Chorus, Compressor, Gain, HighpassFilter, HighShelfFilte
 HERE = Path(__file__).resolve().parent
 log = logging.getLogger("music_pro")
 
+sys.path.insert(0, str(HERE))
+import timeline  # noqa: E402
+
 SR = 44100
-DURATION = 27.5
-BPM = 118
+DURATION = timeline.DURATION
+BPM = 125                       # bar = 1.92 s: bar 9 lands on the features cut
 BEAT = 60 / BPM
 BAR = BEAT * 4
-OFFSET = 4.2 - 2 * BAR          # bar 2 downbeat == scene-2 cut
+OFFSET = timeline.B[0] - 2 * BAR   # bar 2 downbeat == scene-2 cut
 PPQ = 480
 SF2_CANDIDATES = [Path("/usr/share/sounds/sf2/FluidR3_GM.sf2"), Path("/usr/share/soundfonts/FluidR3_GM.sf2")]
 
@@ -41,10 +44,10 @@ PROG = [
     {"name": "Am", "root": 33, "triad": [60, 64, 69]},
     {"name": "F", "root": 29, "triad": [60, 65, 69]},
 ]
-N_BARS = 14                     # bar 13 = final hit (26.57 s)
-FINAL_BAR = 13
-BUILD_BARS = (6, 7)             # snare roll / tension before the lift
-LIFT_BAR = 8                    # 16.4 s, features scene
+N_BARS = 16                     # bar 15 = final hit (29.16 s), under the brand sign-off
+FINAL_BAR = 15
+BUILD_BARS = (7, 8)             # snare roll / tension before the lift
+LIFT_BAR = 9                    # 17.64 s, features scene cut
 
 
 def find_sf2(explicit: Path | None) -> Path:

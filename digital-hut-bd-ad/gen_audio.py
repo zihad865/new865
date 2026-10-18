@@ -20,8 +20,10 @@ HERE = Path(__file__).resolve().parent
 log = logging.getLogger("gen_audio")
 
 SR = 44100
-DURATION = 27.5
-B = [4.2, 9.6, 15.4, 21.6]          # scene boundaries, same as index.html
+import timeline  # noqa: E402
+
+DURATION = timeline.DURATION
+B = timeline.B                      # scene cuts, shared with index.html via timeline.js
 BPM = 112
 BEAT = 60 / BPM
 BAR = BEAT * 4
@@ -243,66 +245,53 @@ def build_sfx(n: int) -> np.ndarray:
     # transitions
     for b in B:
         place(fx, whoosh(), b - 0.48, 0.55)
+    C = timeline.CUES
     # scene 1 — logo
     place(fx, pop(1100, 500), 0.15, 0.6)
     place(fx, whoosh(0.6), 0.35, 0.3, -0.6)
     place(fx, whoosh(0.6), 0.65, 0.3, 0.6)
-    place(fx, impact(), 0.95, 0.7)
+    place(fx, impact(), 0.95, 0.55)
     for i in range(14):
         if i != 7:                                           # space between words
-            place(fx, tick(), 1.3 + i * 0.04, 0.25, -0.6 + i * 0.09)
-    place(fx, pop(700, 300), 2.1, 0.35)
-    # scene 2 — hook
-    s2 = B[0] + 0.35
-    place(fx, pop(1200, 600), s2, 0.45)
-    for i in range(3):
-        place(fx, pop(800, 400), s2 + 0.3 + i * 0.14, 0.25)
-    for i in range(2):
-        place(fx, pop(900, 450), s2 + 0.85 + i * 0.16, 0.28)
-    for i in range(4):
-        place(fx, pop(600 + i * 150, 300 + i * 80), s2 + 1.45 + i * 0.18, 0.45, -0.5 + i * 0.33)
-    for i in range(3):
-        place(fx, pop(800, 400), s2 + 2.35 + i * 0.14, 0.25)
-    for i in range(3):
-        place(fx, impact(), s2 + 2.95 + i * 0.16, 0.28)
-    place(fx, boing(), s2 + 3.6, 0.4)
+            place(fx, tick(), C["s1_brand"] + i * 0.04, 0.16, -0.6 + i * 0.09)
+    place(fx, pop(700, 300), C["s1_tag"], 0.25)
+    # scene 2 — hook (light accents only; the voice carries the words)
+    place(fx, pop(1200, 600), C["s2_kicker"], 0.35)
+    for i, t in enumerate(C["s2_l3"]):
+        place(fx, pop(600 + i * 150, 300 + i * 80), t, 0.3, -0.5 + i * 0.33)
+    place(fx, pop(800, 400), C["s2_l5"][0], 0.25)
+    place(fx, boing(), C["s2_q"], 0.3)
     # scene 3 — link + clone
-    s3 = B[1] + 0.3
-    place(fx, pop(900, 450), s3, 0.35)
-    place(fx, whoosh(0.5), s3 + 0.3, 0.3)
+    place(fx, pop(900, 450), C["s3_title"], 0.3)
+    place(fx, whoosh(0.5), C["s3_url"], 0.25)
     chars = len("www.your-favourite-site.com")
+    t0, dur = C["s3_type"]
     for i in range(chars):
-        place(fx, key_click(), s3 + 0.8 + 1.4 * i / chars + rng.uniform(-0.008, 0.008), rng.uniform(0.35, 0.55), rng.uniform(-0.2, 0.2))
-    place(fx, key_click(), s3 + 2.3, 0.9)
-    place(fx, pop(500, 250), s3 + 2.32, 0.5)
-    place(fx, whoosh(0.5), s3 + 2.45, 0.3, -0.6)
-    place(fx, pop(1000, 500), s3 + 2.8, 0.4)
-    place(fx, whoosh(0.5), s3 + 2.9, 0.3, 0.6)
-    place(fx, riser(1.2), s3 + 3.15, 0.18, 0.5)
-    for i in range(3):
-        place(fx, pop(700 + i * 200, 350 + i * 100), s3 + 3.25 + i * 0.28, 0.35, 0.5)
-    place(fx, ding(note("E6")), s3 + 4.0, 0.25, 0.5)
-    place(fx, pop(800, 400), s3 + 4.1, 0.3)
-    # scene 4 — features (rising checkmark dings)
-    s4 = B[2] + 0.3
-    place(fx, pop(900, 450), s4, 0.35)
+        place(fx, key_click(), t0 + dur * i / chars + rng.uniform(-0.008, 0.008),
+              rng.uniform(0.22, 0.34), rng.uniform(-0.2, 0.2))
+    place(fx, key_click(), C["s3_go"], 0.7)
+    place(fx, pop(500, 250), C["s3_go"] + 0.02, 0.4)
+    place(fx, whoosh(0.5), C["s3_bw1"] - 0.05, 0.25, -0.6)
+    place(fx, pop(1000, 500), C["s3_arrow"], 0.3)
+    place(fx, whoosh(0.5), C["s3_bw2"] - 0.05, 0.25, 0.6)
+    place(fx, riser(C["s3_scan"][1]), C["s3_scan"][0], 0.12, 0.5)
+    for i, t in enumerate(C["s3_blk"]):
+        place(fx, pop(700 + i * 200, 350 + i * 100), t, 0.25, 0.5)
+    place(fx, ding(note("E6")), C["s3_lb2"], 0.2, 0.5)
+    # scene 4 — features (rising checkmark dings, C major pentatonic)
     scale = ["A5", "C6", "D6", "E6", "G6", "A6"]
-    for i in range(6):
-        place(fx, whoosh(0.4), s4 + 0.7 + i * 0.5, 0.18, -0.5 if i % 2 == 0 else 0.5)
-        place(fx, ding(note(scale[i])), s4 + 1.05 + i * 0.5, 0.3, -0.4 if i % 2 == 0 else 0.4)
+    for i, t in enumerate(C["s4_cards"]):
+        place(fx, whoosh(0.4), t - 0.05, 0.14, -0.5 if i % 2 == 0 else 0.5)
+        place(fx, ding(note(scale[i])), t + C["s4_check_delay"], 0.24, -0.4 if i % 2 == 0 else 0.4)
     # scene 5 — CTA
-    s5 = B[3] + 0.3
-    place(fx, pop(1100, 500), s5, 0.5)
-    place(fx, pop(800, 400), s5 + 0.4, 0.3)
-    place(fx, whoosh(0.8), s5 + 0.8, 0.5, -0.4)
-    place(fx, impact(), s5 + 1.1, 0.75)
-    place(fx, ding(note("A5")), s5 + 1.15, 0.3)
-    place(fx, ding(note("E6")), s5 + 1.2, 0.2)
-    place(fx, pop(600, 300), s5 + 1.75, 0.45)
-    for i in range(3):
-        place(fx, pop(1000 + i * 200, 500 + i * 100), s5 + 2.3 + i * 0.15, 0.3, -0.5 + i * 0.5)
-    for i, n_ in enumerate(["A5", "C#6", "E6"]):                # bright major sign-off
-        place(fx, ding(note(n_), 1.5), s5 + 2.9 + i * 0.09, 0.22)
+    place(fx, pop(1100, 500), C["s5_logo"], 0.4)
+    place(fx, whoosh(0.8), C["s5_env"], 0.4, -0.4)
+    place(fx, impact(), C["s5_big"] + 0.05, 0.55)
+    place(fx, pop(600, 300), C["s5_btn"], 0.35)
+    for i, t in enumerate(C["s5_chips"]):
+        place(fx, pop(1000 + i * 200, 500 + i * 100), t, 0.22, -0.5 + i * 0.5)
+    for i, n_ in enumerate(["C6", "E6", "G6"]):                 # bright major sign-off, in key
+        place(fx, ding(note(n_), 1.5), C["s5_foot"] + i * 0.09, 0.18)
     return fx
 
 

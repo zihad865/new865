@@ -11,6 +11,10 @@ Pipeline:
 
 Run inside the VoiceStudio venv:
   /home/user/voicestudio/.venv/bin/python voiceover.py
+
+Or use a recorded / externally generated take (one file, all five lines in
+order) instead of generating; it is cut and placed with timeline.VO_LINES:
+  python3 voiceover.py --voice-file take.wav
 """
 import argparse
 import json
@@ -27,6 +31,7 @@ import numpy as np
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 import gen_audio  # noqa: E402  (music + sfx stems, same timeline)
+import timeline  # noqa: E402
 
 log = logging.getLogger("voiceover")
 SR = gen_audio.SR
@@ -145,6 +150,41 @@ def synth(model, text: str, lang: str, voice: dict, args, duration: float | None
     return wav.squeeze(0).numpy().astype(np.float64)
 
 
+# ---------------------------------------------------------------- recorded take
+def load_audio(path: Path) -> np.ndarray:
+    """Decode any audio file to mono float at SR via ffmpeg."""
+    cmd = ["ffmpeg", "-v", "error", "-i", str(path), "-ac", "1", "-ar", str(SR),
+           "-af", "aresample=resampler=soxr:precision=28", "-f", "f32le", "-"]
+    try:
+        raw = subprocess.run(cmd, check=True, capture_output=True).stdout
+    except subprocess.CalledProcessError:
+        cmd[cmd.index("-af") + 1] = "aresample"            # ffmpeg built without soxr
+        raw = subprocess.run(cmd, check=True, capture_output=True).stdout
+    x = np.frombuffer(raw, dtype="<f4").astype(np.float64)
+    if not len(x):
+        raise ValueError(f"{path}: no audio decoded")
+    return x
+
+
+def take_to_track(take: np.ndarray, n: int, target_rms_db: float, stems: Path) -> np.ndarray:
+    """Process the whole take once (even tone), then cut and place each line."""
+    x = compress(eq(take))
+    speech = x[np.abs(x) > db(-40) * np.abs(x).max()]
+    x *= db(target_rms_db) / rms(speech if len(speech) else x)
+    if np.abs(x).max() > 0.95:
+        x *= 0.95 / np.abs(x).max()
+    vo = np.zeros(n)
+    for ln in timeline.VO_LINES:
+        a, b = (int(t * SR) for t in ln["take"])
+        seg = fade(x[a:min(b, len(x))], ms=15)
+        i = int(ln["at"] * SR)
+        seg = seg[: max(0, n - i)]
+        vo[i:i + len(seg)] += seg
+        write_wav(stems / f"{ln['id']}.wav", seg)
+        log.info("%s: take %.2f-%.2fs -> video %.2f-%.2fs", ln["id"], *ln["take"], ln["at"], ln["at"] + len(seg) / SR)
+    return vo
+
+
 # ---------------------------------------------------------------- mix
 def duck_curve(voice: np.ndarray, depth_db: float) -> np.ndarray:
     env = envelope(voice, 0.03, 0.35)
@@ -169,6 +209,7 @@ def mux(video: Path, audio: Path, out: Path, lufs: float) -> None:
 
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    p.add_argument("--voice-file", type=Path, help="use this recorded take instead of generating with OmniVoice")
     p.add_argument("--script", type=Path, default=HERE / "voiceover_script.json", help="lines + timing JSON")
     p.add_argument("--model", default="k2-fsa/OmniVoice", help="HF repo id or local model directory")
     p.add_argument("--device", default="auto", choices=["auto", "cpu", "cuda", "mps"])
@@ -180,10 +221,10 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--speed", type=float, default=1.0, help="speaking speed for lines that fit their slot")
     p.add_argument("--seed", type=int, default=865, help="random seed for repeatable takes")
     p.add_argument("--voice-db", type=float, default=-18.0, help="per-line voice RMS before mix (dBFS)")
-    p.add_argument("--music-duck", type=float, default=9.0, help="music duck under voice (dB)")
+    p.add_argument("--music-duck", type=float, default=10.0, help="music duck under voice (dB)")
     p.add_argument("--sfx-duck", type=float, default=4.0, help="sfx duck under voice (dB)")
-    p.add_argument("--music", type=float, default=0.8, help="music level (default 0.8)")
-    p.add_argument("--sfx", type=float, default=0.9, help="sfx level (default 0.9)")
+    p.add_argument("--music", type=float, default=0.6, help="music level (default 0.6)")
+    p.add_argument("--sfx", type=float, default=0.75, help="sfx level (default 0.75)")
     p.add_argument("--lufs", type=float, default=-14.0, help="final integrated loudness (default -14)")
     p.add_argument("--video", type=Path, default=HERE / "digital-hut-bd-ad.mp4", help="rendered ad video")
     p.add_argument("-o", "--output", type=Path, default=HERE / "digital-hut-bd-ad-voiceover.mp4")
@@ -223,15 +264,33 @@ def main() -> int:
         log.error("ffmpeg not found on PATH")
         return 2
 
+    n = int(gen_audio.DURATION * SR)
+    a.stems.mkdir(parents=True, exist_ok=True)
+    if a.voice_file:
+        if not a.voice_file.is_file():
+            log.error("voice file not found: %s", a.voice_file)
+            return 2
+        try:
+            take = load_audio(a.voice_file)
+        except (subprocess.CalledProcessError, ValueError) as e:
+            log.error("could not decode %s: %s", a.voice_file, e)
+            return 1
+        log.info("voice take %.2fs, placing %d lines", len(take) / SR, len(timeline.VO_LINES))
+        vo = take_to_track(take, n, a.voice_db, a.stems)
+    else:
+        vo = generate_track(a, lines, lang, voice, n)
+        if vo is None:
+            return 1
+    return finish(a, vo, n)
+
+
+def generate_track(a, lines, lang, voice, n):
     try:
         model = load_model(a.model, a.device)
     except Exception as e:  # network / weights / dependency errors all land here
         log.error("could not load model %s: %s", a.model, e)
-        return 1
-
-    n = int(gen_audio.DURATION * SR)
+        return None
     vo = np.zeros(n)
-    a.stems.mkdir(parents=True, exist_ok=True)
     for ln in lines:
         slot = ln["end"] - ln["start"]
         t0 = time.time()
@@ -249,7 +308,10 @@ def main() -> int:
         i = int(ln["start"] * SR)
         seg = wav[: max(0, n - i)]
         vo[i:i + len(seg)] += seg
+    return vo
 
+
+def finish(a, vo: np.ndarray, n: int) -> int:
     log.info("building music and sfx stems")
     music = gen_audio.build_music(n) * a.music * 0.55
     sfx = gen_audio.build_sfx(n) * a.sfx * 0.6
