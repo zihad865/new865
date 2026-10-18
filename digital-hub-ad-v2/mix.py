@@ -455,7 +455,7 @@ def duck(bed: np.ndarray, voice: np.ndarray, depths=(4.0, 9.0, 5.0), lookahead: 
 
 
 # ---------------------------------------------------------------- master
-def loudnorm_mux(video: Path, audio: Path, out: Path, lufs: float = -14.0, tp: float = -1.0) -> None:
+def loudnorm_mux(video: Path, audio: Path, out: Path, lufs: float = -14.0, tp: float = -1.8) -> None:
     meas = subprocess.run(["ffmpeg", "-hide_banner", "-i", str(audio), "-af",
                            f"loudnorm=I={lufs}:TP={tp}:LRA=11:print_format=json", "-f", "null", "-"],
                           check=True, capture_output=True, text=True).stderr
