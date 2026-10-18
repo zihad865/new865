@@ -53,7 +53,7 @@ def main() -> int:
         log.warning("chromium not found at %s, falling back to Playwright default", a.chromium)
 
     scale = a.size / 1080
-    url = a.html.as_uri() + "?capture=1"
+    url = a.html.resolve().as_uri() + "?capture=1"
 
     with sync_playwright() as pw:
         try:
