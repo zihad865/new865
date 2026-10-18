@@ -14,6 +14,8 @@ from pathlib import Path
 
 import numpy as np
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
 HERE = Path(__file__).resolve().parent
 log = logging.getLogger("gen_audio")
 
@@ -173,6 +175,16 @@ def riser(dur: float) -> np.ndarray:
 
 # ---------------------------------------------------------------- composition
 def build_music(n: int) -> np.ndarray:
+    """Sampled-instrument production bed (music_pro.py); synth fallback if FluidSynth is missing."""
+    try:
+        import music_pro
+        return music_pro.build(n)
+    except (ImportError, FileNotFoundError, subprocess.CalledProcessError) as e:
+        log.warning("pro music unavailable (%s), using synth fallback", e)
+        return build_music_synth(n)
+
+
+def build_music_synth(n: int) -> np.ndarray:
     mus = np.zeros((n, 2))
     duck = np.ones(n)                      # sidechain envelope driven by the kick
     prog = [["A3", "C4", "E4"], ["F3", "A3", "C4"], ["C4", "E4", "G4"], ["G3", "B3", "D4"]]
