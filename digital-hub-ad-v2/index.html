@@ -1,0 +1,610 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Digital Hub Ad</title>
+<style>
+@font-face{font-family:'Anek Bangla';font-weight:100 800;src:url('../digital-hub-ad/fonts/AnekBangla.ttf') format('truetype')}
+@font-face{font-family:'Roboto';font-weight:100 900;src:url('../digital-hub-ad/fonts/Roboto.ttf') format('truetype')}
+
+:root{
+  --bg:#060b16; --bg2:#0b1630; --blue:#256fb6; --blue2:#3d8fe0; --glow:#4da3ff; --cyan:#59d0ff;
+  --grey:#4d4d4d; --mute:#8fa3c0; --line:rgba(120,170,230,.18); --white:#fff; --ink:#0e1626;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%;background:#000;overflow:hidden}
+body{display:flex;align-items:center;justify-content:center}
+#wrap{width:1080px;height:1080px;transform-origin:center center;flex:none}
+#stage{position:relative;width:1080px;height:1080px;overflow:hidden;background:var(--bg);
+  font-family:'Anek Bangla','Roboto',sans-serif;color:var(--white)}
+.abs{position:absolute}
+.scene{position:absolute;inset:0;opacity:0}
+.el{transform-origin:center center}
+svg .el{transform-box:fill-box;transform-origin:center}
+.en{font-family:Roboto}
+
+/* ---------- world ---------- */
+#sky{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 20%,#10224a 0%,#0a1430 40%,var(--bg) 75%)}
+.orb{position:absolute;border-radius:50%;filter:blur(90px)}
+#floorWrap{position:absolute;left:-540px;right:-540px;top:640px;height:900px;perspective:600px;perspective-origin:50% 0%}
+#floor{position:absolute;inset:0;transform:rotateX(72deg);transform-origin:50% 0%;
+  background-image:linear-gradient(rgba(77,163,255,.32) 2px,transparent 2px),linear-gradient(90deg,rgba(77,163,255,.32) 2px,transparent 2px);
+  background-size:90px 90px;-webkit-mask-image:linear-gradient(to bottom,transparent 0%,#000 25%,#000 60%,transparent 100%);mask-image:linear-gradient(to bottom,transparent 0%,#000 25%,#000 60%,transparent 100%)}
+#horizon{position:absolute;left:0;right:0;top:630px;height:3px;background:linear-gradient(90deg,transparent,rgba(77,163,255,.7),transparent);filter:blur(1px)}
+.star{position:absolute;width:3px;height:3px;border-radius:50%;background:#cfe3ff}
+#vig{position:absolute;inset:0;background:radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,.55) 100%);pointer-events:none}
+#streak{position:absolute;left:-300px;top:0;width:260px;height:1080px;background:linear-gradient(90deg,transparent,rgba(160,210,255,.55),transparent);transform:skewX(-18deg);opacity:0;filter:blur(6px)}
+#flash{position:absolute;inset:0;background:#cfe6ff;opacity:0;pointer-events:none}
+
+/* ---------- shared ---------- */
+.glass{background:linear-gradient(160deg,rgba(255,255,255,.10),rgba(255,255,255,.035));border:1.5px solid rgba(160,200,255,.22);
+  box-shadow:0 30px 70px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.15)}
+.m{display:inline-block;overflow:hidden;vertical-align:bottom;line-height:1.25;padding:.2em .05em .08em;margin:-.2em -.05em -.08em}
+.m .w{line-height:1.25}
+.w{display:inline-block}
+.grad{background:linear-gradient(90deg,#7cc0ff,#3d8fe0 55%,#59d0ff);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hlb{color:var(--glow)}
+.win{border-radius:14px;overflow:hidden;background:#fff;box-shadow:0 30px 60px rgba(0,0,0,.5)}
+.win .bar{height:22px;background:#eef1f6;display:flex;align-items:center;gap:5px;padding-left:9px}
+.win .bar i{width:7px;height:7px;border-radius:50%;display:block;background:#c9cfda}
+.win .bar i:nth-child(1){background:#ff5f57}.win .bar i:nth-child(2){background:#febc2e}.win .bar i:nth-child(3){background:#28c840}
+.win .pg{padding:10px;display:flex;flex-direction:column;gap:8px}
+.win b{display:block;border-radius:6px}
+
+/* ---------- 1 · question ---------- */
+#qa{left:0;right:0;top:300px;text-align:center}
+#qa .l1{font-size:64px;font-weight:700;color:#dbe7ff}
+#qa .l2{font-size:84px;font-weight:800;margin-top:6px}
+#qa .l3{margin-top:40px;display:flex;justify-content:center;align-items:center;gap:22px}
+.chip{display:flex;align-items:center;gap:14px;padding:16px 30px;border-radius:22px;font:800 40px Roboto;color:#fff}
+.chip svg{flex:none}
+.amp{font:800 44px Roboto;color:var(--mute)}
+#qb{left:0;right:0;top:330px;text-align:center}
+#qb .l1{font-size:70px;font-weight:700;color:#dbe7ff}
+#qb .l2{font-size:124px;font-weight:800;line-height:1.1;margin-top:4px}
+#qmark{display:inline-block;font-family:Roboto;font-weight:900;color:var(--glow);text-shadow:0 0 40px rgba(77,163,255,.8)}
+
+/* ---------- 2 · brand ---------- */
+#kick{left:0;right:0;top:250px;text-align:center;font-size:46px;font-weight:600;color:var(--mute);letter-spacing:1px}
+#logoBig{left:390px;top:330px;width:300px;height:270px;overflow:visible}
+#ring{left:390px;top:315px;width:300px;height:300px;border-radius:50%;border:4px solid var(--glow);opacity:0}
+#halo{left:290px;top:215px;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(77,163,255,.45),transparent 65%);opacity:0}
+#wm{left:0;right:0;top:640px;text-align:center;font:800 112px Roboto;letter-spacing:-2px;color:#fff}
+#wm .sweep{position:absolute;top:0;bottom:0;width:160px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.75),transparent);mix-blend-mode:overlay}
+#tag{left:0;right:0;top:800px;text-align:center;font-size:44px;font-weight:700;color:#cfe0ff;word-spacing:6px}
+
+/* ---------- 3 · link ---------- */
+#lh{left:0;right:0;top:92px;text-align:center;font-size:60px;font-weight:800;line-height:1.22}
+#url{left:150px;top:278px;width:780px;height:88px;border-radius:44px;display:flex;align-items:center;gap:16px;padding:0 12px 0 30px}
+#urltext{font:500 30px Roboto;color:#e6efff;white-space:nowrap}
+#caret{width:3px;height:36px;background:var(--glow);margin-left:-12px}
+#ufill{flex:1}
+#go{height:64px;padding:0 30px;border-radius:32px;background:linear-gradient(90deg,var(--blue),var(--blue2));font-size:30px;font-weight:700;display:flex;align-items:center;gap:8px;box-shadow:0 0 30px rgba(77,163,255,.5)}
+#srcw{left:110px;top:420px;width:330px;height:300px}
+#srcw .pg{height:278px;background:linear-gradient(135deg,#2a1260,#5b1f8f 55%,#c2306a)}
+#srcw b{background:rgba(255,255,255,.25)}
+#dstw{left:640px;top:420px;width:330px;height:300px}
+#dstw .pg{height:278px;background:#fff;position:relative}
+#beam{left:450px;top:556px;width:180px;height:28px}
+#scan{left:0;right:0;top:22px;height:5px;background:var(--glow);box-shadow:0 0 22px 6px rgba(77,163,255,.7)}
+#okb{left:930px;top:398px;width:60px;height:60px}
+.lbl{font-size:26px;font-weight:600;color:var(--mute);text-align:center;width:330px}
+#ls{left:110px;top:732px}#ld{left:640px;top:732px;color:#bfe0ff}
+#cap{left:0;right:0;top:800px;text-align:center;font-size:50px;font-weight:700;line-height:1.3}
+
+/* ---------- 4 · features ---------- */
+#fhead{left:70px;top:62px;font-size:38px;font-weight:700;color:var(--mute);display:flex;align-items:center;gap:14px}
+#fhead i{width:12px;height:12px;border-radius:50%;background:var(--glow);box-shadow:0 0 14px var(--glow);display:block}
+#fcount{right:70px;top:62px;font:700 34px Roboto;color:var(--mute)}
+#fcount b{color:#fff}
+#prog{left:70px;right:70px;top:970px;display:flex;gap:12px}
+#prog div{flex:1;height:8px;border-radius:4px;background:rgba(255,255,255,.12);overflow:hidden}
+#prog div i{display:block;height:100%;width:100%;background:linear-gradient(90deg,var(--blue),var(--glow));transform-origin:left center;transform:scaleX(0)}
+.feat{position:absolute;inset:0;opacity:0}
+.ft{position:absolute;left:0;right:0;top:122px;text-align:center;font-size:70px;font-weight:800;line-height:1.08}
+.panel{position:absolute;left:110px;top:322px;width:860px;height:590px;border-radius:30px;overflow:hidden}
+/* f1 design */
+#art{left:70px;top:70px;width:500px;height:440px;border-radius:14px;background:#fff;overflow:hidden}
+#art .col{position:absolute;top:0;bottom:0;width:2px;background:repeating-linear-gradient(to bottom,rgba(37,111,182,.45) 0 8px,transparent 8px 16px)}
+#art .bk{position:absolute;border-radius:10px}
+.sw{position:absolute;width:62px;height:62px;border-radius:50%;box-shadow:0 8px 20px rgba(0,0,0,.35)}
+#aa{left:640px;top:250px;font:800 96px Roboto;color:#fff}
+#aab{left:648px;top:370px;font-size:58px;font-weight:700;color:var(--mute)}
+/* f2 responsive */
+#lap{left:70px;top:90px;width:560px;height:390px}
+#lapScr{left:0;top:0;width:560px;height:350px;border-radius:18px;background:#111a2e;border:10px solid #1d2840;overflow:hidden}
+#lapBase{left:-30px;top:350px;width:620px;height:26px;border-radius:0 0 18px 18px;background:linear-gradient(#2a3654,#151d31)}
+#phone{left:620px;top:120px;width:190px;height:380px;border-radius:30px;background:#111a2e;border:9px solid #1d2840;overflow:hidden}
+.site{position:absolute;inset:0;background:#fff;padding:12px;display:flex;flex-direction:column;gap:9px}
+.site b{display:block;border-radius:6px}
+.devl{font-size:28px;font-weight:700;color:var(--mute)}
+/* f3 brand */
+#bwin{left:80px;top:60px;width:700px;height:470px}
+#bwin .pg{height:448px;position:relative;padding:0}
+#bhdr{position:absolute;left:0;right:0;top:0;height:86px;display:flex;align-items:center;gap:16px;padding:0 26px}
+#bhdrG{position:absolute;inset:0;background:#e9edf3}
+#bhdrB{position:absolute;inset:0;background:linear-gradient(90deg,var(--blue),var(--blue2))}
+#blogoP{position:absolute;left:26px;top:15px;width:56px;height:56px;border-radius:50%;background:#c9d0db;color:#7d8696;font:800 13px Roboto;display:flex;align-items:center;justify-content:center}
+#blogoB{position:absolute;left:26px;top:15px;width:56px;height:56px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center}
+#bname{position:absolute;left:100px;top:22px;font-size:36px;font-weight:800;color:#fff;white-space:nowrap}
+#bnav{position:absolute;right:26px;top:36px;display:flex;gap:14px}
+#bnav b{width:60px;height:12px;border-radius:6px;background:rgba(255,255,255,.7);display:block}
+.tl{position:absolute;left:40px;height:20px;border-radius:10px;background:#d8e2ef;overflow:hidden}
+.tl i{display:block;height:100%;width:100%;background:#4d5b70;transform-origin:left center;transform:scaleX(0)}
+#bimg{position:absolute;right:40px;top:130px;width:230px;height:200px;border-radius:16px;background:linear-gradient(135deg,#cfe3f7,#9cc6ee)}
+/* f4 toggles */
+.tg{position:absolute;left:150px;width:560px;height:96px;border-radius:22px;display:flex;align-items:center;gap:18px;padding:0 26px}
+.tg .ti{width:52px;height:52px;border-radius:14px;background:rgba(77,163,255,.18);display:flex;align-items:center;justify-content:center}
+.tg .tx{flex:1;font-size:34px;font-weight:700}
+.tg .sw2{width:90px;height:48px;border-radius:24px;background:rgba(255,255,255,.18);position:relative}
+.tg .sw2 u{position:absolute;inset:0;border-radius:24px;background:linear-gradient(90deg,var(--blue),var(--glow));opacity:0;display:block}
+.tg .sw2 s{position:absolute;left:5px;top:5px;width:38px;height:38px;border-radius:50%;background:#fff;display:block}
+/* f5 delivery */
+#ringw{left:110px;top:90px;width:420px;height:420px}
+#pct{left:110px;top:240px;width:420px;text-align:center;font:800 96px Roboto}
+#rdy{left:110px;top:360px;width:420px;text-align:center;font-size:40px;font-weight:800;color:var(--glow)}
+.spd{position:absolute;height:6px;border-radius:3px;background:linear-gradient(90deg,transparent,var(--glow))}
+#bolt{left:600px;top:170px;width:200px;height:260px}
+
+/* ---------- 5 · trust ---------- */
+#shield{left:420px;top:150px;width:240px;height:280px;overflow:visible}
+#shalo{left:340px;top:120px;width:400px;height:400px;border-radius:50%;background:radial-gradient(circle,rgba(77,163,255,.45),transparent 65%)}
+#tt{left:0;right:0;top:470px;text-align:center;font-size:76px;font-weight:800;line-height:1.15}
+#recap{left:90px;right:90px;top:690px;display:flex;flex-wrap:wrap;justify-content:center;gap:16px}
+.rc{display:flex;align-items:center;gap:10px;padding:14px 24px;border-radius:40px;font-size:30px;font-weight:700}
+.rc i{width:30px;height:30px;border-radius:50%;background:var(--blue2);display:flex;align-items:center;justify-content:center}
+
+/* ---------- 6 · CTA ---------- */
+#cl{left:0;right:0;top:200px;text-align:center;font-size:60px;font-weight:700;color:#dbe7ff}
+#btn{left:190px;top:330px;width:700px;height:150px;border-radius:75px;background:linear-gradient(90deg,var(--blue),var(--blue2) 60%,#4aa6ff);
+  display:flex;align-items:center;justify-content:center;gap:22px;font-size:66px;font-weight:800;box-shadow:0 0 60px rgba(77,163,255,.55),0 20px 0 #0d2a52}
+#btn b{font-family:Roboto;font-weight:900}
+#bring{left:190px;top:330px;width:700px;height:150px;border-radius:75px;border:5px solid var(--glow)}
+#ripple{left:0;top:0;width:60px;height:60px;margin:-30px 0 0 -30px;border-radius:50%;background:rgba(255,255,255,.6)}
+#cursor{left:0;top:0;width:54px;height:54px;filter:drop-shadow(0 8px 10px rgba(0,0,0,.5))}
+#endL{left:0;right:0;top:600px;display:flex;align-items:center;justify-content:center;gap:28px}
+#endL svg{width:150px;height:136px;overflow:visible}
+#endL .wm2{font:800 100px Roboto;letter-spacing:-2px}
+#endT{left:0;right:0;top:790px;text-align:center;font-size:40px;font-weight:600;color:var(--mute)}
+#endHalo{left:240px;top:500px;width:600px;height:400px;border-radius:50%;background:radial-gradient(ellipse,rgba(77,163,255,.35),transparent 65%)}
+
+/* HUD brand mark */
+#hud{left:60px;top:996px;display:flex;align-items:center;gap:10px;font:700 24px Roboto;color:rgba(220,235,255,.75)}
+#hud svg{width:30px;height:27px}
+</style>
+</head>
+<body>
+<div id="wrap"><div id="stage">
+
+  <!-- world -->
+  <div id="sky"></div>
+  <div class="orb el" id="orbA" style="left:-120px;top:-60px;width:520px;height:520px;background:rgba(37,111,182,.55)"></div>
+  <div class="orb el" id="orbB" style="left:680px;top:520px;width:520px;height:520px;background:rgba(89,208,255,.25)"></div>
+  <div id="stars"></div>
+  <div id="floorWrap"><div id="floor"></div></div>
+  <div id="horizon"></div>
+
+  <!-- ===== 1 · question ===== -->
+  <section class="scene" id="s1">
+    <div id="wins"></div>
+    <div id="qa" class="abs el">
+      <div class="l1"><span class="m"><span class="w el">আপনার</span></span> <span class="m"><span class="w el">পছন্দের</span></span> <span class="m"><span class="w el">যেকোনো</span></span></div>
+      <div class="l2"><span class="m"><span class="w el"><span class="grad en" style="font-weight:900">Website</span>-এর</span></span> <span class="m"><span class="w el">মতো</span></span></div>
+      <div class="l3">
+        <div class="chip glass el"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#7cc0ff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><circle cx="11" cy="11" r="2"/></svg>Design</div>
+        <div class="chip glass el"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#7cc0ff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Layout</div>
+        <div class="amp el">&amp;</div>
+        <div class="chip glass el"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#7cc0ff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><path d="M17.5 14v7M14 17.5h7"/></svg>Features</div>
+      </div>
+    </div>
+    <div id="qb" class="abs">
+      <div class="l1"><span class="m"><span class="w el">নিজের</span></span> <span class="m"><span class="w el"><span class="grad en" style="font-weight:900">Website</span></span></span></div>
+      <div class="l2"><span class="m"><span class="w el">তৈরি</span></span> <span class="m"><span class="w el">করতে</span></span> <span class="m"><span class="w el">চান</span></span><span id="qmark" class="el">?</span></div>
+    </div>
+  </section>
+
+  <!-- ===== 2 · brand ===== -->
+  <section class="scene" id="s2">
+    <div id="kick" class="abs el">তাহলে আছে</div>
+    <div id="halo" class="abs el"></div>
+    <div id="ring" class="abs el"></div>
+    <svg id="logoBig" class="abs" viewBox="240 150 245 220">
+      <line class="el lk" x1="318" y1="185" x2="360" y2="262" stroke="#4da3ff" stroke-width="18" stroke-linecap="round" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1"/>
+      <line class="el lk" x1="360" y1="262" x2="318" y2="335" stroke="#4da3ff" stroke-width="18" stroke-linecap="round" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1"/>
+      <line class="el lk" x1="450" y1="262" x2="405" y2="335" stroke="#c9d6ea" stroke-width="18" stroke-linecap="round" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1"/>
+      <g id="ldots"></g>
+    </svg>
+    <div id="wm" class="abs el"><span class="m"><span class="w el">Digital</span></span> <span class="m"><span class="w el" style="color:#7cc0ff">Hub</span></span><div class="sweep el" id="sweep"></div></div>
+    <div id="tag" class="abs"><span class="m"><span class="w el">প্রফেশনাল</span></span> <span class="m"><span class="w el en" style="font-weight:700">Website</span></span> <span class="m"><span class="w el en" style="font-weight:700;color:#7cc0ff">Clone</span></span> <span class="m"><span class="w el">সার্ভিস</span></span></div>
+  </section>
+
+  <!-- ===== 3 · link ===== -->
+  <section class="scene" id="s3">
+    <div id="lh" class="abs"><span class="m"><span class="w el">শুধু</span></span> <span class="m"><span class="w el">আপনার</span></span> <span class="m"><span class="w el">পছন্দের</span></span><br><span class="m"><span class="w el"><span class="en" style="font-weight:800">Website</span>-এর</span></span> <span class="m"><span class="w el hlb">লিংক</span></span> <span class="m"><span class="w el hlb">দিন</span></span></div>
+    <div id="url" class="abs glass el">
+      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#7cc0ff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+      <span id="urltext" data-full="www.your-favourite-site.com"></span><span id="caret"></span><span id="ufill"></span>
+      <div id="go" class="el">দিন <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg></div>
+    </div>
+    <div id="srcw" class="abs win el"><div class="bar"><i></i><i></i><i></i></div><div class="pg">
+      <b style="height:14px;width:40%"></b><b style="height:30px;width:80%;background:rgba(255,255,255,.45)"></b><b style="height:12px;width:60%"></b>
+      <b style="height:22px;width:36%;background:#ffd166"></b><div style="display:flex;gap:7px;margin-top:auto"><b style="flex:1;height:60px"></b><b style="flex:1;height:60px"></b><b style="flex:1;height:60px"></b></div></div></div>
+    <svg id="beam" class="abs" viewBox="0 0 180 28"><path id="beamP" class="el" d="M6 14 H162" stroke="#4da3ff" stroke-width="5" stroke-linecap="round" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1"/><path id="beamA" class="el" d="M150 3 L168 14 L150 25" fill="none" stroke="#4da3ff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <div id="dstw" class="abs win el"><div class="bar"><i></i><i></i><i></i></div><div class="pg">
+      <b class="el blk" style="height:20px;background:linear-gradient(90deg,#256fb6,#3d8fe0)"></b>
+      <b class="el blk" style="height:96px;background:linear-gradient(120deg,#256fb6,#59a8ec);"></b>
+      <b class="el blk" style="height:12px;width:60%;background:#c6d6ea"></b>
+      <div class="el blk" style="display:flex;gap:7px;margin-top:auto"><b style="flex:1;height:60px;background:#e3eef9;border:1px solid #c6daf0"></b><b style="flex:1;height:60px;background:#e3eef9;border:1px solid #c6daf0"></b><b style="flex:1;height:60px;background:#e3eef9;border:1px solid #c6daf0"></b></div>
+      </div><div id="scan" class="abs el"></div></div>
+    <svg id="okb" class="abs el" viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="#22c55e"/><path d="M7 12.5l3.2 3.2L17 9" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <div id="ls" class="abs lbl el">পছন্দের Website</div>
+    <div id="ld" class="abs lbl el">আপনার Website</div>
+    <div id="cap" class="abs"><span class="m"><span class="w el">আপনার প্রয়োজন অনুযায়ী</span></span><br><span class="m"><span class="w el"><span class="grad en" style="font-weight:900">Similar Website</span></span></span> <span class="m"><span class="w el">তৈরি করে দেওয়া হবে</span></span></div>
+  </section>
+
+  <!-- ===== 4 · features ===== -->
+  <section class="scene" id="s4">
+    <div id="fhead" class="abs el"><i></i>যা পাচ্ছেন</div>
+    <div id="fcount" class="abs el"><b id="fnum">০১</b> / ০৬</div>
+    <div id="feats"></div>
+  </section>
+
+  <!-- ===== 5 · trust ===== -->
+  <section class="scene" id="s5">
+    <div id="shalo" class="abs el"></div>
+    <svg id="shield" class="abs el" viewBox="0 0 24 28">
+      <defs><linearGradient id="sg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4da3ff"/><stop offset="1" stop-color="#1a4f86"/></linearGradient></defs>
+      <path d="M12 27s10-4.6 10-12.4V5.4L12 1.6 2 5.4v9.2C2 22.4 12 27 12 27z" fill="url(#sg)" stroke="#9fd0ff" stroke-width=".8"/>
+      <path id="shchk" class="el" d="M7 14.2l3.4 3.4L17.4 10.6" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1"/>
+    </svg>
+    <div id="tt" class="abs"><span class="m"><span class="w el">বিশ্বস্ত ও</span></span> <span class="m"><span class="w el grad">নির্ভরযোগ্য</span></span><br><span class="m"><span class="w el">সার্ভিস</span></span></div>
+    <div id="recap" class="abs"></div>
+  </section>
+
+  <!-- ===== 6 · CTA ===== -->
+  <section class="scene" id="s6">
+    <div id="cl" class="abs"><span class="m"><span class="w el">যেকোনো</span></span> <span class="m"><span class="w el"><span class="en" style="font-weight:700">Website</span></span></span> <span class="m"><span class="w el">ক্লোন</span></span> <span class="m"><span class="w el">নিতে</span></span> <span class="m"><span class="w el">চাইলে</span></span></div>
+    <div id="bring" class="abs el"></div>
+    <div id="btn" class="abs el"><svg width="66" height="66" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-12.3 7.4L3 21l2.1-5.6A8.4 8.4 0 1 1 21 11.5z"/><path d="M8 12h.01M12 12h.01M16 12h.01" stroke-width="3"/></svg>এখনই <b>Inbox</b> করুন</div>
+    <div id="ripple" class="abs"></div>
+    <div id="endHalo" class="abs el"></div>
+    <div id="endL" class="abs el">
+      <svg viewBox="240 150 245 220"><line x1="318" y1="185" x2="360" y2="262" stroke="#4da3ff" stroke-width="18" stroke-linecap="round"/><line x1="360" y1="262" x2="318" y2="335" stroke="#4da3ff" stroke-width="18" stroke-linecap="round"/><line x1="450" y1="262" x2="405" y2="335" stroke="#c9d6ea" stroke-width="18" stroke-linecap="round"/><g fill="#c9d6ea"><circle cx="275" cy="262" r="28"/><circle cx="405" cy="185" r="28"/><circle cx="450" cy="262" r="28"/><circle cx="405" cy="335" r="28"/></g><g fill="#4da3ff"><circle cx="318" cy="185" r="28"/><circle cx="360" cy="262" r="28"/><circle cx="318" cy="335" r="28"/></g></svg>
+      <span class="wm2">Digital <span style="color:#7cc0ff">Hub</span></span>
+    </div>
+    <div id="endT" class="abs el">প্রফেশনাল Website Clone সার্ভিস</div>
+    <svg id="cursor" class="abs el" viewBox="0 0 24 24"><path d="M4 2l15 11-6.5 1.2L16 21l-3 1.4-3.6-6.8L4 20z" fill="#fff" stroke="#0b1630" stroke-width="1.4" stroke-linejoin="round"/></svg>
+  </section>
+
+  <!-- HUD + overlays -->
+  <div id="hud" class="abs el"><svg viewBox="240 150 245 220"><line x1="318" y1="185" x2="360" y2="262" stroke="#4da3ff" stroke-width="18"/><line x1="360" y1="262" x2="318" y2="335" stroke="#4da3ff" stroke-width="18"/><line x1="450" y1="262" x2="405" y2="335" stroke="#c9d6ea" stroke-width="18"/><g fill="#c9d6ea"><circle cx="275" cy="262" r="28"/><circle cx="405" cy="185" r="28"/><circle cx="450" cy="262" r="28"/><circle cx="405" cy="335" r="28"/></g><g fill="#4da3ff"><circle cx="318" cy="185" r="28"/><circle cx="360" cy="262" r="28"/><circle cx="318" cy="335" r="28"/></g></svg>Digital Hub</div>
+  <div id="prog" class="abs el"><div><i></i></div><div><i></i></div><div><i></i></div><div><i></i></div><div><i></i></div><div><i></i></div></div>
+  <div id="streak"></div>
+  <div id="vig"></div>
+  <div id="flash"></div>
+</div></div>
+
+<script src="timeline.js"></script>
+<script>
+(() => {
+  'use strict';
+  if (!window.TL) throw new Error('timeline.js missing: run python3 timeline.py');
+  const { DURATION, BEAT, GRID0, SCENES: S, CUES: C } = window.TL;
+  const NS = 'http://www.w3.org/2000/svg';
+  const $ = s => document.querySelector(s), $$ = s => Array.from(document.querySelectorAll(s));
+  const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+  const lerp = (a, b, p) => a + (b - a) * p;
+  const E = {
+    lin: p => p, out: p => 1 - Math.pow(1 - p, 3), out5: p => 1 - Math.pow(1 - p, 5), in: p => p * p * p,
+    inout: p => p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2,
+    back: p => { const c1 = 1.70158, c3 = c1 + 1; return 1 + c3 * Math.pow(p - 1, 3) + c1 * Math.pow(p - 1, 2); },
+    elastic: p => p === 0 || p === 1 ? p : Math.pow(2, -10 * p) * Math.sin((p * 10 - 0.75) * (2 * Math.PI) / 3) + 1,
+  };
+  const BN = n => String(n).replace(/\d/g, d => '০১২৩৪৫৬৭৮৯'[d]);
+  let seed = 7; const rnd = () => { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; };
+  const LOGO = [[275, 262, 0], [318, 185, 1], [405, 185, 0], [360, 262, 1], [450, 262, 0], [318, 335, 1], [405, 335, 0]];
+
+  // ---------- build ----------
+  const stars = [];
+  for (let i = 0; i < 60; i++) {
+    const d = document.createElement('div'); d.className = 'star';
+    $('#stars').appendChild(d);
+    stars.push({ el: d, x: rnd() * 1080, y: rnd() * 620, tw: 0.5 + rnd() * 2, ph: rnd() * 6.28, s: 0.6 + rnd() * 1.2 });
+  }
+  // floating "favourite" sites (scene 1)
+  const WIN = [
+    { x: 40, y: 70, w: 300, r: -12, g: 'linear-gradient(135deg,#ff8a3d,#ff3d77)', z: 0.85 },
+    { x: 760, y: 90, w: 280, r: 10, g: 'linear-gradient(135deg,#2a1260,#7b3fe4)', z: 0.8 },
+    { x: 60, y: 760, w: 290, r: 8, g: 'linear-gradient(135deg,#0f766e,#34d399)', z: 0.75 },
+    { x: 740, y: 750, w: 300, r: -9, g: 'linear-gradient(135deg,#1e293b,#f59e0b)', z: 0.8 },
+  ];
+  WIN.forEach((o, i) => {
+    const d = document.createElement('div');
+    d.className = 'abs win el wf'; d.style.cssText = `left:${o.x}px;top:${o.y}px;width:${o.w}px;height:${o.w * 0.68}px`;
+    d.innerHTML = `<div class="bar"><i></i><i></i><i></i></div><div class="pg" style="height:${o.w * 0.68 - 22}px;background:${o.g}">
+      <b style="height:10px;width:40%;background:rgba(255,255,255,.4)"></b><b style="height:20px;width:75%;background:rgba(255,255,255,.7)"></b>
+      <b style="height:8px;width:55%;background:rgba(255,255,255,.4)"></b><div style="display:flex;gap:6px;margin-top:auto"><b style="flex:1;height:34px;background:rgba(255,255,255,.25)"></b><b style="flex:1;height:34px;background:rgba(255,255,255,.25)"></b></div></div>`;
+    $('#wins').appendChild(d); o.el = d;
+  });
+  // logo dots that fly in (scene 2)
+  const flyers = LOGO.map(([cx, cy, blue], i) => {
+    const c = document.createElementNS(NS, 'circle');
+    c.setAttribute('cx', cx); c.setAttribute('cy', cy); c.setAttribute('r', 28);
+    c.setAttribute('fill', blue ? '#4da3ff' : '#c9d6ea'); c.setAttribute('class', 'el');
+    $('#ldots').appendChild(c);
+    const ang = (i / 7) * Math.PI * 2 + 0.4;
+    return { el: c, dx: Math.cos(ang) * (700 + rnd() * 300), dy: Math.sin(ang) * (600 + rnd() * 200) };
+  });
+
+  // features (scene 4)
+  const FT = [
+    'প্রফেশনাল <span class="grad">ডিজাইন</span>',
+    'মোবাইল ও ডেস্কটপ<br><span class="grad">রেসপন্সিভ</span>',
+    'কাস্টম <span class="grad">লোগো, নাম</span><br>ও কনটেন্ট',
+    'প্রয়োজন অনুযায়ী <span class="grad">ফিচার</span>',
+    '<span class="grad">ফাস্ট</span> ডেলিভারি',
+  ];
+  const SITE = (hero = 'linear-gradient(120deg,#256fb6,#59a8ec)') => `<b style="height:14px;background:#256fb6"></b><b style="height:70px;background:${hero}"></b><b style="height:10px;width:60%;background:#c6d6ea"></b><div style="display:flex;gap:6px;margin-top:auto"><b style="flex:1;height:50px;background:#e3eef9"></b><b style="flex:1;height:50px;background:#e3eef9"></b><b style="flex:1;height:50px;background:#e3eef9"></b></div>`;
+  const PHONE = `<b style="height:12px;background:#256fb6"></b><b style="height:90px;background:linear-gradient(120deg,#256fb6,#59a8ec)"></b><b style="height:8px;width:70%;background:#c6d6ea"></b><b style="height:8px;width:50%;background:#c6d6ea"></b><b style="height:56px;background:#e3eef9"></b><b style="height:56px;background:#e3eef9"></b>`;
+  const TGL = [['লাইভ চ্যাট', '<path d="M21 11.5a8.4 8.4 0 0 1-12.3 7.4L3 21l2.1-5.6A8.4 8.4 0 1 1 21 11.5z"/>'],
+               ['অনলাইন অর্ডার', '<circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M2 3h3l2.6 12.4a1.5 1.5 0 0 0 1.5 1.1h8.8a1.5 1.5 0 0 0 1.5-1.2L21 8H6"/>'],
+               ['কন্টাক্ট ফর্ম', '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 7l9 6 9-6"/>'],
+               ['গ্যালারি', '<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/>']];
+  const VIS = [
+    // f1 design
+    `<div id="art" class="abs el">${[1, 2, 3, 4, 5].map(i => `<div class="col el" style="left:${i * 83}px"></div>`).join('')}
+      <div class="bk el" style="left:24px;top:22px;width:452px;height:36px;background:#256fb6"></div>
+      <div class="bk el" style="left:24px;top:74px;width:270px;height:150px;background:linear-gradient(120deg,#256fb6,#59a8ec)"></div>
+      <div class="bk el" style="left:310px;top:74px;width:166px;height:150px;background:#dbe8f6"></div>
+      <div class="bk el" style="left:24px;top:240px;width:180px;height:14px;background:#c6d6ea"></div>
+      <div class="bk el" style="left:24px;top:276px;width:140px;height:130px;background:#e3eef9"></div>
+      <div class="bk el" style="left:180px;top:276px;width:140px;height:130px;background:#e3eef9"></div>
+      <div class="bk el" style="left:336px;top:276px;width:140px;height:130px;background:#e3eef9"></div>
+      <svg class="abs" style="left:0;top:0" width="500" height="440"><path id="pen" class="el" d="M30 380 C 140 180, 260 420, 470 120" fill="none" stroke="#ff4d8d" stroke-width="5" stroke-linecap="round" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1"/></svg></div>
+      <div class="sw el" style="left:640px;top:110px;background:#256fb6"></div><div class="sw el" style="left:715px;top:110px;background:#59a8ec"></div><div class="sw el" style="left:790px;top:110px;background:#4d4d4d"></div>
+      <div id="aa" class="abs el">Aa</div><div id="aab" class="abs el">অ আ</div>`,
+    // f2 responsive
+    `<div id="lap" class="abs el"><div id="lapScr" class="abs"><div class="site">${SITE()}</div></div><div id="lapBase" class="abs"></div></div>
+      <div id="phone" class="abs el"><div class="site" style="padding:9px;gap:7px">${PHONE}</div></div>
+      <div class="abs devl el" style="left:70px;top:510px;width:560px;text-align:center">ডেস্কটপ</div>
+      <div class="abs devl el" style="left:620px;top:510px;width:190px;text-align:center">মোবাইল</div>`,
+    // f3 custom logo, name & content
+    `<div id="bwin" class="abs win el"><div class="bar"><i></i><i></i><i></i></div><div class="pg">
+      <div id="bhdr"><div id="bhdrG" class="el"></div><div id="bhdrB" class="el"></div>
+        <div id="blogoP" class="el">LOGO</div>
+        <div id="blogoB" class="el"><svg width="40" height="36" viewBox="240 150 245 220"><line x1="318" y1="185" x2="360" y2="262" stroke="#256fb6" stroke-width="18"/><line x1="360" y1="262" x2="318" y2="335" stroke="#256fb6" stroke-width="18"/><line x1="450" y1="262" x2="405" y2="335" stroke="#4d4d4d" stroke-width="18"/><g fill="#4d4d4d"><circle cx="275" cy="262" r="28"/><circle cx="405" cy="185" r="28"/><circle cx="450" cy="262" r="28"/><circle cx="405" cy="335" r="28"/></g><g fill="#256fb6"><circle cx="318" cy="185" r="28"/><circle cx="360" cy="262" r="28"/><circle cx="318" cy="335" r="28"/></g></svg></div>
+        <div id="bname" data-full="আপনার ব্র্যান্ড"></div><div id="bnav"><b></b><b></b><b></b></div></div>
+      <div class="tl" style="top:140px;width:300px"><i class="el"></i></div><div class="tl" style="top:180px;width:260px"><i class="el"></i></div>
+      <div class="tl" style="top:220px;width:200px"><i class="el"></i></div><div class="tl" style="top:290px;width:150px;height:44px;border-radius:22px;background:#cfe0f3"><i class="el" style="background:#256fb6"></i></div>
+      <div id="bimg" class="el"></div></div></div>`,
+    // f4 toggles
+    TGL.map(([t, ic], i) => `<div class="tg glass el" style="top:${50 + i * 124}px"><div class="ti"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#7cc0ff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">${ic}</svg></div><div class="tx">${t}</div><div class="sw2"><u class="el"></u><s class="el"></s></div></div>`).join(''),
+    // f5 delivery
+    `<svg id="ringw" class="abs" viewBox="0 0 420 420"><circle cx="210" cy="210" r="170" fill="none" stroke="rgba(255,255,255,.12)" stroke-width="26"/>
+      <circle id="ringp" class="el" cx="210" cy="210" r="170" fill="none" stroke="url(#rg5)" stroke-width="26" stroke-linecap="round" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1" transform="rotate(-90 210 210)"/>
+      <defs><linearGradient id="rg5" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#256fb6"/><stop offset="1" stop-color="#59d0ff"/></linearGradient></defs></svg>
+      <div id="pct" class="abs">০%</div><div id="rdy" class="abs el">রেডি!</div>
+      ${[0, 1, 2, 3, 4].map(i => `<div class="spd el" style="left:${560 + (i % 2) * 40}px;top:${150 + i * 62}px;width:${170 + (i * 37) % 90}px"></div>`).join('')}
+      <svg id="bolt" class="abs el" viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" fill="#4da3ff" stroke="#bfe0ff" stroke-width=".6" stroke-linejoin="round"/></svg>`,
+  ];
+  FT.forEach((t, i) => {
+    const f = document.createElement('div');
+    f.className = 'feat'; f.id = 'f' + i;
+    f.innerHTML = `<div class="ft el">${t}</div><div class="panel glass el">${VIS[i]}</div>`;
+    $('#feats').appendChild(f);
+  });
+  // recap chips (scene 5)
+  ['প্রফেশনাল ডিজাইন', 'রেসপন্সিভ', 'কাস্টম লোগো ও কনটেন্ট', 'প্রয়োজনমতো ফিচার', 'ফাস্ট ডেলিভারি'].forEach(t => {
+    const d = document.createElement('div'); d.className = 'rc glass el';
+    d.innerHTML = `<i><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg></i>${t}`;
+    $('#recap').appendChild(d);
+  });
+
+  // ---------- tween engine ----------
+  const tracks = new Map();
+  function tw(sel, t0, dur, props, ease = 'out', stagger = 0) {
+    const els = typeof sel === 'string' ? $$(sel) : (Array.isArray(sel) ? sel : [sel]);
+    if (!els.length) throw new Error('Timeline selector matched nothing: ' + sel);
+    els.forEach((el, i) => {
+      const s = t0 + i * stagger;
+      if (!tracks.has(el)) tracks.set(el, []);
+      tracks.get(el).push({ t0: s, t1: s + dur, props, ease: E[ease] || E.out });
+    });
+  }
+  function twAt(sel, times, dur, props, ease = 'out') {
+    const els = $$(sel);
+    if (els.length !== times.length) throw new Error(`twAt ${sel}: ${els.length} elements, ${times.length} cues`);
+    els.forEach((el, i) => tw(el, times[i], dur, props, ease));
+  }
+  const TF = ['x', 'y', 's', 'sx', 'r', 'rx', 'ry'];
+  const DEF = { x: 0, y: 0, s: 1, sx: 1, r: 0, rx: 0, ry: 0 };
+  function apply(el, v) {
+    if ('o' in v) el.style.opacity = v.o;
+    if (TF.some(k => k in v)) {
+      for (const k of TF) if (!(k in v)) v[k] = DEF[k];
+      const p3 = (v.rx || v.ry) ? `perspective(1400px) rotateX(${v.rx}deg) rotateY(${v.ry}deg) ` : '';
+      el.style.transform = `${p3}translate(${v.x}px,${v.y}px) scale(${v.s * v.sx},${v.s}) rotate(${v.r}deg)`;
+    }
+    if ('blur' in v) el.style.filter = v.blur > 0.05 ? `blur(${v.blur}px)` : 'none';
+    if ('dash' in v) el.style.strokeDashoffset = v.dash;
+    if ('type' in v) { const full = el.dataset.full || ''; const g = Array.from(full); el.textContent = g.slice(0, Math.round(v.type * g.length)).join(''); }
+  }
+  function renderTracks(t) {
+    for (const [el, list] of tracks) {
+      const v = {};
+      for (const tr of list) for (const k in tr.props) {
+        const [a, b] = tr.props[k];
+        if (t >= tr.t0) { const p = tr.t1 > tr.t0 ? clamp((t - tr.t0) / (tr.t1 - tr.t0), 0, 1) : 1; v[k] = lerp(a, b, tr.ease(p)); }
+        else if (!(k in v)) v[k] = a;
+      }
+      apply(el, v);
+    }
+  }
+
+  // ---------- timeline ----------
+  // scene windows: push in (scale up from 0.94, unblur), push out (scale to 1.1, blur), dipping through the world
+  Object.entries(S).forEach(([id, [a, b]], i) => {
+    const el = '#' + id;
+    if (i === 0) tw(el, 0, 0.001, { o: [1, 1] });
+    else tw(el, a, 0.42, { o: [0, 1], s: [0.94, 1], blur: [10, 0] }, 'out');
+    if (b < DURATION) tw(el, b - 0.3, 0.3, { o: [1, 0], s: [1, 1.1], blur: [0, 12] }, 'in');
+  });
+  const up = { y: [80, 0], o: [0, 1] };
+  tw('#flash', 0, 0.001, { o: [0, 0] }); tw('#ring', 0, 0.001, { o: [0, 0] });
+  tw('#sweep', 0, 0.001, { o: [0, 0], x: [-300, -300] });
+
+  // 1 · question
+  WIN.forEach((o, i) => {
+    tw(o.el, 0.05 + i * 0.12, 1.0, { y: [140, 0], s: [o.z * 0.7, o.z], o: [0, 0.9], r: [o.r * 2, o.r] }, 'out5');
+    tw(o.el, C.q2[0] - 0.1, 1.5, { x: [0, (540 - o.x - o.w / 2) * 0.55], y: [0, (540 - o.y - 100) * 0.55], s: [o.z, o.z * 0.55], o: [0.9, 0.35], blur: [0, 4] }, 'inout');
+  });
+  twAt('#qa .l1 .w', C.q1.slice(0, 3), 0.55, up, 'out5');
+  twAt('#qa .l2 .w', C.q1.slice(3, 5), 0.6, { y: [100, 0], o: [0, 1] }, 'out5');
+  twAt('#qa .l3 .el', [C.q1[5], C.q1[6], C.q1[7], C.q1[8]], 0.5, { s: [0.4, 1], o: [0, 1], y: [30, 0] }, 'back');
+  tw('#qa', C.q1_out, 0.32, { o: [1, 0], y: [0, -60], blur: [0, 10] }, 'in');
+  twAt('#qb .l1 .w', C.q2.slice(0, 2), 0.55, up, 'out5');
+  twAt('#qb .l2 .w', C.q2.slice(2, 5), 0.6, { y: [120, 0], o: [0, 1] }, 'out5');
+  tw('#qmark', C.q_mark + 0.05, 0.8, { s: [0, 1], r: [-30, 0], o: [0, 1] }, 'elastic');
+
+  // 2 · brand: dots fly in and lock on "ডিজিটাল", wordmark on "হাব"
+  tw('#kick', C.b_kicker, 0.5, { y: [30, 0], o: [0, 1] }, 'out5');
+  tw('#kick', C.b_logo - 0.1, 0.3, { o: [1, 0.55] }, 'out');
+  const [cv0, cvd] = C.b_converge;
+  flyers.forEach((f, i) => tw(f.el, cv0 + i * 0.02, cvd - i * 0.02, { x: [f.dx * 0.35, 0], y: [f.dy * 0.35, 0], s: [0.4, 1], o: [0, 1] }, 'in'));
+  twAt('#logoBig .lk', [C.b_logo + 0.02, C.b_logo + 0.1, C.b_logo + 0.18], 0.25, { dash: [1, 0] }, 'out');
+  tw('#flash', C.b_logo, 0.45, { o: [0.35, 0] }, 'out');
+  tw('#ring', C.b_logo, 0.9, { s: [0.7, 2.2], o: [0.9, 0] }, 'out');
+  tw('#halo', C.b_logo, 0.6, { o: [0, 1], s: [0.6, 1] }, 'out');
+  tw('#logoBig', C.b_logo, 0.12, { s: [1, 1.08] }, 'out'); tw('#logoBig', C.b_logo + 0.12, 0.4, { s: [1.08, 1] }, 'back');
+  twAt('#wm .w', [C.b_word - 0.12, C.b_word], 0.6, { y: [130, 0], o: [0, 1] }, 'out5');
+  tw('#sweep', C.b_word + 0.35, 0.8, { x: [-80, 1120], o: [1, 1] }, 'inout');
+  twAt('#tag .w', C.b_tag, 0.5, up, 'out5');
+
+  // 3 · link -> similar website
+  twAt('#lh .w', C.l_head, 0.5, up, 'out5');
+  tw('#url', C.l_url, 0.5, { y: [40, 0], o: [0, 1], s: [0.92, 1] }, 'back');
+  tw('#urltext', C.l_type[0], C.l_type[1], { type: [0, 1] }, 'lin');
+  tw('#go', C.l_go - 0.05, 0.1, { s: [1, 0.85] }, 'out'); tw('#go', C.l_go + 0.05, 0.3, { s: [0.85, 1] }, 'back');
+  tw('#srcw', C.l_src, 0.55, { x: [-80, 0], o: [0, 1], ry: [25, 8] }, 'out5');
+  tw('#ls', C.l_src + 0.2, 0.4, { o: [0, 1] });
+  tw('#beamP', C.l_dst - 0.05, 0.4, { dash: [1, 0] }, 'out'); tw('#beamA', C.l_dst + 0.25, 0.3, { o: [0, 1], x: [-14, 0] }, 'out');
+  tw('#dstw', C.l_dst + 0.1, 0.55, { x: [80, 0], o: [0, 1], ry: [-25, -8] }, 'out5');
+  twAt('#dstw .blk', C.l_blk, 0.45, { s: [0.6, 1], o: [0, 1] }, 'back');
+  tw('#scan', C.l_scan[0], C.l_scan[1], { y: [0, 270], o: [1, 1] }, 'inout'); tw('#scan', C.l_scan[0] + C.l_scan[1], 0.2, { o: [1, 0] });
+  tw('#ld', C.l_blk[3], 0.4, { o: [0, 1] });
+  twAt('#cap .w', C.l_cap, 0.55, up, 'out5');
+  tw('#okb', C.l_ok, 0.5, { s: [0, 1], o: [0, 1] }, 'elastic');
+
+  // 4 · features: one spotlight per spoken item
+  tw('#fhead', S.s4[0] + 0.1, 0.5, { x: [-30, 0], o: [0, 1] }, 'out5');
+  tw('#fcount', S.s4[0] + 0.1, 0.5, { x: [30, 0], o: [0, 1] }, 'out5');
+  C.f.forEach((t, i) => {
+    const f = '#f' + i, next = C.f[i + 1];
+    tw(f, t - 0.18, 0.4, { o: [0, 1], x: [160, 0] }, 'out5');
+    if (next) tw(f, next - 0.22, 0.26, { o: [1, 0], x: [0, -160], blur: [0, 8] }, 'in');
+    tw(f + ' .ft', t - 0.18, 0.5, { y: [40, 0] }, 'out5');
+    tw(f + ' .panel', t - 0.12, 0.55, { y: [60, 0], s: [0.94, 1] }, 'out5');
+    tw($$('#prog div i')[i], t - 0.1, 0.5, { sx: [0, 1] }, 'out');
+  });
+  const [f1, f2, f3, f4, f5] = C.f;
+  tw('#f0 .col', f1, 0.3, { o: [0, 1], y: [-40, 0] }, 'out', 0.04);
+  tw('#f0 .bk', f1 + 0.12, 0.35, { s: [0.5, 1], o: [0, 1] }, 'back', 0.06);
+  tw('#pen', f1 + 0.35, 0.65, { dash: [1, 0] }, 'inout');
+  tw('#f0 .sw', f1 + 0.3, 0.4, { s: [0, 1] }, 'back', 0.08);
+  tw('#aa', f1 + 0.45, 0.45, { y: [30, 0], o: [0, 1] }, 'out5'); tw('#aab', f1 + 0.55, 0.45, { y: [30, 0], o: [0, 1] }, 'out5');
+  tw('#lap', f2, 0.55, { y: [50, 0], o: [0, 1], rx: [20, 0] }, 'out5');
+  tw('#phone', f2 + 0.45, 0.6, { x: [260, 0], o: [0, 1], r: [12, 0] }, 'out5');
+  tw('#f1 .devl', f2 + 0.7, 0.4, { o: [0, 1] }, 'out', 0.15);
+  tw('#bwin', f3, 0.5, { y: [40, 0], o: [0, 1] }, 'out5');
+  tw('#blogoP', f3 + 0.3, 0.25, { o: [1, 0], s: [1, 0.5] }, 'in');
+  tw('#blogoB', f3 + 0.42, 0.45, { o: [0, 1], s: [0.3, 1] }, 'back');
+  tw('#bhdrB', f3 + 0.35, 0.5, { o: [0, 1] }, 'out');
+  tw('#bname', f3 + 0.5, 0.55, { type: [0, 1] }, 'lin');
+  tw('#f2 .tl i', f3 + 0.85, 0.4, { sx: [0, 1] }, 'out', 0.18);
+  tw('#bimg', f3 + 1.1, 0.45, { s: [0.6, 1], o: [0, 1] }, 'back');
+  tw('#f3 .tg', f4 - 0.05, 0.4, { x: [60, 0], o: [0, 1] }, 'out5', 0.08);
+  tw('#f3 .tg s', f4 + 0.35, 0.25, { x: [0, 42] }, 'out', 0.2);
+  tw('#f3 .tg u', f4 + 0.35, 0.25, { o: [0, 1] }, 'out', 0.2);
+  tw('#ringp', f5, 0.95, { dash: [1, 0] }, 'inout');
+  tw('#f4 .spd', f5 + 0.05, 0.35, { x: [120, 0], o: [0, 0.9] }, 'out', 0.06);
+  tw('#bolt', f5 + 0.1, 0.5, { s: [0.3, 1], o: [0, 1], r: [-20, 0] }, 'back');
+  tw('#rdy', f5 + 0.95, 0.4, { s: [0.5, 1], o: [0, 1] }, 'back');
+
+  // 5 · trust
+  tw('#prog', S.s4[0] + 0.1, 0.4, { o: [0, 1] }); tw('#prog', S.s6[0] - 0.3, 0.3, { o: [1, 0] });
+  tw($$('#prog div i')[5], C.t, 0.5, { sx: [0, 1] }, 'out');
+  tw('#shield', C.t_shield, 0.6, { s: [0.3, 1], o: [0, 1], r: [-12, 0] }, 'back');
+  tw('#shalo', C.t_shield, 0.8, { s: [0.5, 1], o: [0, 1] }, 'out');
+  tw('#shchk', C.t_shield + 0.35, 0.4, { dash: [1, 0] }, 'out');
+  twAt('#tt .w', [C.t, C.t + 0.45, C.t + 1.4], 0.55, up, 'out5');
+  twAt('#recap .rc', C.t_recap, 0.45, { y: [30, 0], s: [0.8, 1], o: [0, 1] }, 'back');
+
+  // 6 · CTA + end card
+  twAt('#cl .w', C.c_line, 0.5, up, 'out5');
+  tw('#btn', C.c_btn - 0.1, 0.55, { s: [0.4, 1], o: [0, 1] }, 'back');
+  tw('#cursor', C.c_btn + 0.05, C.c_press - C.c_btn - 0.05, { x: [980, 700], y: [1000, 420], o: [0, 1] }, 'inout');
+  tw('#cursor', C.c_press, 0.08, { s: [1, 0.8] }); tw('#cursor', C.c_press + 0.08, 0.25, { s: [0.8, 1] }, 'back');
+  tw('#cursor', C.c_end + 0.2, 0.4, { o: [1, 0], y: [420, 520], x: [700, 760] }, 'in');
+  tw('#btn', C.c_press, 0.08, { s: [1, 0.94] }); tw('#btn', C.c_press + 0.08, 0.35, { s: [0.94, 1] }, 'back');
+  tw('#endHalo', C.c_end, 0.8, { o: [0, 1], s: [0.6, 1] }, 'out');
+  tw('#endL', C.c_end - 0.05, 0.65, { y: [60, 0], s: [0.7, 1], o: [0, 1] }, 'back');
+  tw('#endT', C.c_end + 0.5, 0.5, { y: [20, 0], o: [0, 1] }, 'out5');
+  tw('#flash', C.c_end - 0.04, 0.5, { o: [0.3, 0] }, 'out');
+  // HUD mark between brand reveal and end card
+  tw('#hud', S.s3[0] + 0.3, 0.5, { o: [0, 1] }); tw('#hud', S.s6[0] - 0.3, 0.3, { o: [1, 0] });
+  // light streaks on the big moments
+  const streaks = [C.b_logo + 0.05, S.s4[0], S.s6[0], C.c_end];
+
+  // ---------- continuous (pure functions of t) ----------
+  const ripple = $('#ripple'), bring = $('#bring'), btn = $('#btn'), caret = $('#caret'), pct = $('#pct');
+  const fnum = $('#fnum'), streak = $('#streak');
+  function fx(t) {
+    // world: drifting orbs, scrolling floor, twinkling stars, gentle camera breathing
+    $('#orbA').style.transform = `translate(${Math.sin(t * 0.25) * 80}px,${Math.cos(t * 0.2) * 60}px)`;
+    $('#orbB').style.transform = `translate(${Math.cos(t * 0.22) * 90}px,${Math.sin(t * 0.27) * 70}px)`;
+    $('#floor').style.backgroundPosition = `0px ${(t * 70) % 90}px`;
+    stars.forEach(s => { s.el.style.opacity = 0.25 + 0.55 * (0.5 + 0.5 * Math.sin(t * s.tw + s.ph)); s.el.style.transform = `translate(${s.x}px,${s.y}px) scale(${s.s})`; });
+    // floating site windows bob
+    WIN.forEach((o, i) => { o.el.style.translate = `0px ${Math.sin(t * 0.9 + i * 1.3) * 10}px`; });
+    // beat-locked pulse on the halo and HUD (100 BPM grid)
+    const bp = ((t - GRID0) / BEAT) % 1;
+    $('#halo').style.scale = String(1 + Math.max(0, 1 - bp * 4) * 0.05);
+    // streak sweeps
+    let so = 0, sx = -600;
+    streaks.forEach(s0 => { const p = (t - s0) / 0.55; if (p >= 0 && p <= 1) { so = Math.sin(p * Math.PI) * 0.9; sx = -600 + p * 2000; } });
+    streak.style.opacity = so; streak.style.left = sx + 'px';
+    // url caret
+    caret.style.opacity = (t > C.l_type[0] && t < C.l_type[0] + C.l_type[1] + 0.1) ? 1 : (Math.floor(t * 2.6) % 2 ? 0 : 1);
+    // feature counter + delivery percentage
+    let k = 0; C.f.forEach((s0, i) => { if (t >= s0 - 0.18) k = i; }); if (t >= C.t) k = 5;
+    fnum.textContent = BN(String(k + 1).padStart(2, '0'));
+    const p5 = clamp((t - C.f[4]) / 0.95, 0, 1);
+    pct.textContent = BN(Math.round(E.inout(p5) * 100)) + '%';
+    // CTA: tap ripple, then a beat-locked pulse ring
+    const rp = (t - C.c_press) / 0.6;
+    if (rp >= 0 && rp <= 1) { ripple.style.opacity = 1 - rp; ripple.style.transform = `translate(700px,420px) scale(${1 + rp * 9})`; } else ripple.style.opacity = 0;
+    const since = t - C.c_pulse;
+    if (since > 0) {
+      const ph = ((t - GRID0) / (BEAT * 2)) % 1;
+      bring.style.opacity = (1 - ph) * 0.8;
+      bring.style.transform = `scale(${1 + ph * 0.12},${1 + ph * 0.5})`;
+    } else bring.style.opacity = 0;
+  }
+
+  function render(t) { t = clamp(t, 0, DURATION); renderTracks(t); fx(t); }
+  window.AD = { render, DURATION };
+
+  const params = new URLSearchParams(location.search), wrap = $('#wrap');
+  const fit = () => { wrap.style.transform = `scale(${params.has('capture') ? 1 : Math.min(innerWidth / 1080, innerHeight / 1080)})`; };
+  addEventListener('resize', fit); fit();
+  render(0);
+  if (!params.has('capture')) document.fonts.ready.then(() => {
+    const start = performance.now();
+    const loop = now => { render(((now - start) / 1000) % (DURATION + 1)); requestAnimationFrame(loop); };
+    requestAnimationFrame(loop);
+  });
+})();
+</script>
+</body>
+</html>
