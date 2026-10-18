@@ -79,6 +79,7 @@ window.TL = {
    28.65
   ],
   "s5_foot": 28.9,
-  "s5_pulse": 28.55
+  "s5_pulse": 28.55,
+  "s5_signoff": 29.95
  }
 };

@@ -41,6 +41,7 @@ CUES = {
     "s4_check_delay": 0.35,
     "s5_logo": 24.5, "s5_t5a": 24.65, "s5_env": 26.55, "s5_big": 26.9,
     "s5_btn": 27.9, "s5_chips": [28.35, 28.5, 28.65], "s5_foot": 28.9, "s5_pulse": 28.55,
+    "s5_signoff": 29.95,                   # after "ডিজিটাল হাট বিডি" ends
 }
 
 

@@ -265,7 +265,7 @@ def build(n: int | None = None, sf2: Path | None = None) -> np.ndarray:
         "glock": (Pedalboard([HighpassFilter(600), Reverb(room_size=0.7, wet_level=0.35, dry_level=0.7)]), 0.3, False),
         "drums": (Pedalboard([HighpassFilter(30), Compressor(-16, 3, 3, 80), PeakFilter(60, 2, 0.9),
                               HighShelfFilter(8000, 1.5), Reverb(room_size=0.3, wet_level=0.08, dry_level=0.95)]), 0.8, False),
-        "crash": (Pedalboard([HighpassFilter(400), Reverb(room_size=0.6, wet_level=0.2, dry_level=0.85)]), 0.42, False),
+        "crash": (Pedalboard([HighpassFilter(400), Reverb(room_size=0.6, wet_level=0.2, dry_level=0.85)]), 0.26, False),
     }
     mix = np.zeros((n, 2), dtype=np.float32)
     for name, (board, gain, duck) in chain.items():
@@ -282,7 +282,7 @@ def build(n: int | None = None, sf2: Path | None = None) -> np.ndarray:
         if len(src) and hit - len(src) >= 0:
             rev = fx(Pedalboard([HighpassFilter(500), Reverb(room_size=0.7, wet_level=0.4)]), src[::-1].copy())
             env = np.linspace(0, 1, len(rev), dtype=np.float32)[:, None] ** 2
-            mix[hit - len(rev): hit] += rev * env * 0.45
+            mix[hit - len(rev): hit] += rev * env * 0.3
 
     master = Pedalboard([HighpassFilter(28), LowShelfFilter(90, 1.0), PeakFilter(350, -1.5, 0.8),
                          HighShelfFilter(10000, 1.5), Compressor(-14, 2.0, 15, 150), Gain(3), Limiter(-1.0, 120)])

@@ -250,7 +250,7 @@ def build_sfx(n: int) -> np.ndarray:
     place(fx, pop(1100, 500), 0.15, 0.6)
     place(fx, whoosh(0.6), 0.35, 0.3, -0.6)
     place(fx, whoosh(0.6), 0.65, 0.3, 0.6)
-    place(fx, impact(), 0.95, 0.55)
+    place(fx, impact(), 0.95, 0.35)
     for i in range(14):
         if i != 7:                                           # space between words
             place(fx, tick(), C["s1_brand"] + i * 0.04, 0.16, -0.6 + i * 0.09)
@@ -286,12 +286,12 @@ def build_sfx(n: int) -> np.ndarray:
     # scene 5 — CTA
     place(fx, pop(1100, 500), C["s5_logo"], 0.4)
     place(fx, whoosh(0.8), C["s5_env"], 0.4, -0.4)
-    place(fx, impact(), C["s5_big"] + 0.05, 0.55)
+    place(fx, impact(), C["s5_big"] + 0.05, 0.28)
     place(fx, pop(600, 300), C["s5_btn"], 0.35)
     for i, t in enumerate(C["s5_chips"]):
-        place(fx, pop(1000 + i * 200, 500 + i * 100), t, 0.22, -0.5 + i * 0.5)
-    for i, n_ in enumerate(["C6", "E6", "G6"]):                 # bright major sign-off, in key
-        place(fx, ding(note(n_), 1.5), C["s5_foot"] + i * 0.09, 0.18)
+        place(fx, pop(1000 + i * 200, 500 + i * 100), t, 0.14, -0.5 + i * 0.5)
+    for i, n_ in enumerate(["C6", "E6", "G6"]):                 # sign-off sparkle after the brand name
+        place(fx, ding(note(n_), 1.5), C["s5_signoff"] + i * 0.09, 0.18)
     return fx
 
 
