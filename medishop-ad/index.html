@@ -1,0 +1,664 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MediShop Sherpur Ad</title>
+<style>
+@font-face{font-family:'Hind Siliguri';font-weight:500;src:url('../digital-hut-bd-ad/fonts/HindSiliguri-Regular.ttf') format('truetype')}
+@font-face{font-family:'Hind Siliguri';font-weight:600;src:url('../digital-hut-bd-ad/fonts/HindSiliguri-SemiBold.ttf') format('truetype')}
+@font-face{font-family:'Hind Siliguri';font-weight:700;src:url('../digital-hut-bd-ad/fonts/HindSiliguri-Bold.ttf') format('truetype')}
+@font-face{font-family:'Poppins';font-weight:600;src:url('../digital-hut-bd-ad/fonts/Poppins-SemiBold.ttf') format('truetype')}
+@font-face{font-family:'Poppins';font-weight:800;src:url('../digital-hut-bd-ad/fonts/Poppins-ExtraBold.ttf') format('truetype')}
+
+:root{
+  --blue:#1458a4; --blue2:#2a7edd; --sky:#e5f3fe; --mint:#1fae7a; --mint-l:#e3f6ee; --ink:#14223a; --mute:#5d6b82;
+  --bg:#f4f8fc; --warn:#e5533d; --sun:#ffb238;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%;background:#0b1220;overflow:hidden}
+body{display:flex;align-items:center;justify-content:center}
+#wrap{width:1080px;height:1920px;transform-origin:center center;flex:none}
+#stage{position:relative;width:1080px;height:1920px;overflow:hidden;background:var(--bg);font-family:'Hind Siliguri','Poppins',sans-serif;color:var(--ink)}
+.abs{position:absolute}
+.scene{position:absolute;inset:0;opacity:0}
+.el{transform-origin:center center}
+svg .el{transform-box:fill-box;transform-origin:center}
+.en{font-family:Poppins}
+.m{display:inline-block;overflow:hidden;vertical-align:bottom;line-height:1.3;padding:.18em .04em .06em;margin:-.18em -.04em -.06em}
+.m .w{display:inline-block;line-height:1.3}
+.hl{color:var(--blue2)}
+.hlm{color:var(--mint)}
+.card{background:#fff;border-radius:34px;box-shadow:0 24px 60px rgba(20,34,58,.14),0 0 0 1px rgba(20,88,164,.06)}
+
+/* captions */
+.cap{left:60px;right:60px;text-align:center;font-weight:700;line-height:1.25}
+.cap.t1{font-size:60px;color:var(--mute);font-weight:600}
+.cap.t2{font-size:82px}
+.pill{display:inline-flex;align-items:center;gap:14px;padding:14px 34px;border-radius:60px;font-weight:700}
+
+/* logo (rebuilt from the app header) */
+.logo{display:flex;flex-direction:column;align-items:flex-start;gap:calc(var(--s)*.12)}
+.logo .pl{display:flex;height:calc(var(--s)*1);border-radius:calc(var(--s)*.5);overflow:hidden;box-shadow:0 calc(var(--s)*.14) calc(var(--s)*.4) rgba(20,88,164,.25)}
+.logo .l{background:linear-gradient(135deg,#1a66bf,#0f4c93);color:#fff;font:800 calc(var(--s)*.62) Poppins;padding:0 calc(var(--s)*.22) 0 calc(var(--s)*.34);display:flex;align-items:center;letter-spacing:-.5px}
+.logo .r{background:#e9f1fc;color:#1d6fd3;font:800 calc(var(--s)*.62) Poppins;padding:0 calc(var(--s)*.36) 0 calc(var(--s)*.18);display:flex;align-items:center;letter-spacing:-.5px}
+.logo .o{display:inline-flex;align-items:center;justify-content:center;width:calc(var(--s)*.5);height:calc(var(--s)*.5);border-radius:50%;background:#1d6fd3;margin:0 calc(var(--s)*.02);position:relative;top:calc(var(--s)*.03)}
+.logo .o svg{width:62%;height:62%}
+.logo .sub{font:700 calc(var(--s)*.3) Poppins;letter-spacing:calc(var(--s)*.17);color:var(--blue2);padding-left:calc(var(--s)*.06)}
+
+/* street (scenes 1-3) */
+#street{position:absolute;left:0;top:0;width:1080px;height:1920px;transform-origin:200px 1350px;overflow:visible}
+.bubble{background:#fff;border-radius:40px;padding:34px 44px;box-shadow:0 24px 60px rgba(20,34,58,.18);font-size:54px;font-weight:700;line-height:1.3}
+.bubble:after{content:'';position:absolute;left:150px;bottom:-34px;border:22px solid transparent;border-top:28px solid #fff;border-bottom:0}
+.no{display:flex;align-items:center;gap:22px;padding:22px 30px;border-radius:28px;background:#fff;box-shadow:0 18px 40px rgba(20,34,58,.14);font-size:46px;font-weight:700}
+.no .ic{width:84px;height:84px;border-radius:22px;background:#fdeceb;display:flex;align-items:center;justify-content:center;position:relative}
+.no .ic:after{content:'';position:absolute;left:8px;right:8px;top:38px;height:7px;border-radius:4px;background:var(--warn);transform:rotate(-35deg)}
+
+/* brand scene */
+#s4{background:radial-gradient(circle at 50% 42%,#2a86e6 0%,#1458a4 60%,#0d3d76 100%);color:#fff;clip-path:circle(0% at 540px 700px);opacity:1}
+#s4 .lines{left:60px;right:60px;top:250px;text-align:center;font-size:72px;font-weight:700;line-height:1.3}
+#logoCard{left:150px;top:880px;width:780px;height:420px;border-radius:48px;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 40px 90px rgba(0,0,0,.35)}
+.ring{position:absolute;border-radius:50%;border:6px solid rgba(255,255,255,.8)}
+.conf{position:absolute;left:0;top:0}
+#pin{left:390px;top:1380px;display:flex;align-items:center;gap:12px;padding:16px 34px;border-radius:50px;background:rgba(255,255,255,.16);border:2px solid rgba(255,255,255,.35);font-size:44px;font-weight:700}
+
+/* phone (shared across scenes 5, 6, 8, 10) */
+#phone{left:240px;top:470px;width:600px;height:1180px;border-radius:70px;background:#0e1626;padding:22px;box-shadow:0 50px 110px rgba(20,34,58,.35),inset 0 0 0 3px #2b3953;z-index:5}
+#screen{position:relative;width:556px;height:1136px;border-radius:50px;overflow:hidden;background:#fff}
+#scr{position:absolute;left:0;top:0;width:556px;height:auto}
+#notch{position:absolute;left:50%;top:16px;width:150px;height:34px;margin-left:-75px;border-radius:20px;background:#0e1626;z-index:3}
+#callUI{position:absolute;left:18px;right:18px;top:70px;border-radius:34px;background:rgba(17,28,48,.96);color:#fff;padding:26px 26px 26px 30px;display:flex;align-items:center;gap:18px;z-index:4}
+#callUI .av{width:84px;height:84px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;flex:none}
+#callUI .nm{font-size:30px;font-weight:700;line-height:1.2}
+#callUI .st{font-size:24px;color:#9fb4d6}
+#callUI .acc{width:76px;height:76px;border-radius:50%;background:#22c55e;display:flex;align-items:center;justify-content:center;margin-left:auto;flex:none}
+
+.chip{display:flex;align-items:center;gap:14px;padding:18px 30px;border-radius:30px;background:#fff;box-shadow:0 18px 44px rgba(20,34,58,.18);font-size:44px;font-weight:700;white-space:nowrap;z-index:6}
+.chip .ci{width:62px;height:62px;border-radius:18px;background:var(--sky);display:flex;align-items:center;justify-content:center}
+.chip.g .ci{background:var(--mint-l)}
+
+/* steps */
+#tracker{left:80px;right:80px;top:330px;display:flex;align-items:flex-start;justify-content:space-between;z-index:6}
+.stp{width:260px;display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center}
+.stp .n{width:96px;height:96px;border-radius:50%;background:#dfe8f4;color:#8a9ab2;font-size:48px;font-weight:700;display:flex;align-items:center;justify-content:center;position:relative}
+.stp .n i{position:absolute;inset:0;border-radius:50%;background:var(--blue2);opacity:0;display:block}
+.stp .n b{position:relative;color:inherit}
+.stp .t{font-size:32px;font-weight:700;color:var(--mute);line-height:1.2}
+.trk{position:absolute;top:46px;height:6px;border-radius:3px;background:#dfe8f4;overflow:hidden}
+.trk i{display:block;height:100%;width:100%;background:var(--blue2);transform-origin:left center;transform:scaleX(0)}
+#stepHead{left:0;right:0;top:170px;text-align:center;font-size:62px;font-weight:700}
+#form{left:110px;top:640px;width:860px;padding:44px 46px;border-radius:40px}
+.fl{font-size:32px;font-weight:600;color:var(--mute);margin:18px 0 10px}
+.fi{height:96px;border-radius:22px;border:3px solid #dbe5f2;display:flex;align-items:center;padding:0 28px;font-size:40px;font-weight:600;gap:12px;background:#fbfdff}
+.fi.on{border-color:var(--blue2)}
+.fi svg{flex:none}
+#placeBtn{margin-top:36px;height:110px;border-radius:30px;background:linear-gradient(90deg,#1458a4,#2a7edd);color:#fff;font-size:46px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:14px}
+#road{left:0;right:0;top:1330px;height:150px;background:#5b6578}
+#road i{position:absolute;top:70px;width:90px;height:10px;background:#f4f8fc;border-radius:5px;display:block}
+#house{left:740px;top:880px;width:300px;height:460px}
+#rider{left:0;top:1060px;width:420px;height:300px}
+#pinH{left:840px;top:760px;width:100px;height:130px}
+#arrived{left:620px;top:640px}
+
+/* finale */
+#s11{background:radial-gradient(circle at 50% 40%,#2a86e6 0%,#1458a4 60%,#0d3d76 100%);color:#fff}
+#s12{background:linear-gradient(180deg,#f4f8fc,#e5f0fb)}
+.cta{display:flex;align-items:center;gap:22px;padding:30px 44px;border-radius:40px;font-size:52px;font-weight:700;width:820px}
+.cta .ci{width:96px;height:96px;border-radius:28px;display:flex;align-items:center;justify-content:center;flex:none}
+
+/* persistent */
+#bar{left:0;right:0;top:1770px;display:flex;justify-content:center;z-index:8}
+#flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:20}
+#shade{position:absolute;inset:0;background:#f4f8fc;opacity:0;pointer-events:none}
+</style>
+</head>
+<body>
+<div id="wrap"><div id="stage">
+
+  <!-- ===== street: scenes 1-3 (two pharmacies, the man, crowds, the helper) ===== -->
+  <section class="scene" id="sStreet" style="opacity:1">
+    <svg id="street" viewBox="0 0 1080 1920" width="1080" height="1920">
+      <defs>
+        <linearGradient id="wallA" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e8f5f0"/><stop offset="1" stop-color="#d7ece4"/></linearGradient>
+        <linearGradient id="wallB" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fbf1e4"/><stop offset="1" stop-color="#f3e2cc"/></linearGradient>
+        <linearGradient id="floorG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c9d3df"/><stop offset="1" stop-color="#aab6c6"/></linearGradient>
+      </defs>
+      <g id="pharmA"></g>
+      <g id="pharmB" opacity="0"></g>
+      <g id="crowdA"></g>
+      <g id="crowdB" opacity="0"></g>
+      <g id="manG"></g>
+      <g id="helperG"></g>
+      <g id="fxG"></g>
+    </svg>
+    <div id="shade" class="el"></div>
+    <!-- captions 1 -->
+    <div class="abs cap t1 el" id="c1a" style="top:180px">ওষুধ কিনতে ফার্মেসিতে…</div>
+    <div class="abs cap t2 el" id="c1b" style="top:270px">লম্বা লাইন, <span class="hl" style="color:#e5533d">শুধু অপেক্ষা!</span></div>
+    <div class="abs cap t1 el" id="c2a" style="top:180px">পাশের ফার্মেসিতেও</div>
+    <div class="abs cap t2 el" id="c2b" style="top:270px"><span style="color:#e5533d">একই ভিড়!</span></div>
+    <div class="abs cap t1 el" id="c2c" style="top:410px;font-size:50px">কোথায় গেলে সহজে ওষুধ পাবেন?</div>
+    <!-- scene 3: helper bubble + "no more" cards -->
+    <div class="abs bubble el" id="bub" style="left:70px;top:150px;width:940px">
+      <span class="m"><span class="w el" id="bw1">ভাই,</span></span> <span class="m"><span class="w el" id="bw2">ওষুধ কেনা নিয়ে</span></span> <span class="m"><span class="w el hl" id="bw3">চিন্তিত?</span></span>
+    </div>
+    <div class="abs no el" id="no1" style="left:120px;top:440px"><div class="ic"><svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="#e5533d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l1.5-5h15L21 9"/><path d="M4 9h16v11H4z"/><path d="M9 20v-6h6v6"/></svg></div>দোকানে দোকানে ঘোরা</div>
+    <div class="abs no el" id="no2" style="left:120px;top:600px"><div class="ic"><svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="#e5533d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="7" r="3"/><circle cx="16" cy="7" r="3"/><path d="M2 21v-2a5 5 0 0 1 5-5h2a5 5 0 0 1 5 5v2M14 14h2a5 5 0 0 1 5 5v2"/></svg></div>ফার্মেসির ভিড়ে দাঁড়ানো</div>
+  </section>
+
+  <!-- ===== 4 · brand ===== -->
+  <section class="scene" id="s4">
+    <div class="abs lines">
+      <div><span class="m"><span class="w el" id="l4a">এখন শেরপুরবাসীর জন্য</span></span></div>
+      <div><span class="m"><span class="w el" id="l4b">চালু হয়েছে আধুনিক</span></span></div>
+      <div><span class="m"><span class="w el" id="l4c" style="color:#bfe3ff">ডিজিটাল ওষুধ কেনার সেবা</span></span></div>
+    </div>
+    <div id="rings"></div>
+    <div id="confetti"></div>
+    <div id="logoCard" class="abs el"><div class="logo" style="--s:150px"><div class="pl"><div class="l">Medi</div><div class="r">Sh<span class="o"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke="#fff" stroke-width="4" stroke-linecap="round"/></svg></span>p</div></div><div class="sub">SHERPUR</div></div></div>
+    <div id="pin" class="abs el"><svg width="44" height="44" viewBox="0 0 24 24" fill="#fff"><path d="M12 22s7-6.2 7-12a7 7 0 0 0-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="10" r="2.6" fill="#1458a4"/></svg>শেরপুর</div>
+  </section>
+
+  <!-- ===== 5 · app / website ===== -->
+  <section class="scene" id="s5">
+    <div class="abs cap t2 el" id="c5" style="top:200px"><span class="hlm">ঘরে বসেই</span> অর্ডার</div>
+    <div class="abs chip el" id="ch_app" style="left:40px;top:640px"><div class="ci"><svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="#1458a4" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="2.5"/><path d="M11 18h2"/></svg></div>অ্যাপ</div>
+    <div class="abs chip el" id="ch_web" style="right:30px;top:780px"><div class="ci"><svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="#1458a4" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 0 20M12 2a15 15 0 0 0 0 20"/></svg></div>ওয়েবসাইট</div>
+    <div class="abs chip el" id="ch_find" style="left:30px;top:1110px"><div class="ci"><svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="#1458a4" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg></div>ওষুধ খুঁজুন</div>
+    <div class="abs chip g el" id="ch_order" style="right:30px;top:1330px"><div class="ci"><svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="#1fae7a" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg></div>অর্ডার করুন</div>
+  </section>
+
+  <!-- ===== 6 · prescription ===== -->
+  <section class="scene" id="s6">
+    <div class="abs cap t1 el" id="c6a" style="top:170px">চাইলে</div>
+    <div class="abs cap t2 el" id="c6b" style="top:250px"><span class="hl">প্রেসক্রিপশনের ছবি</span> পাঠান</div>
+    <svg id="rxp" class="abs el" style="left:640px;top:760px" width="380" height="500" viewBox="0 0 380 500">
+      <rect x="10" y="10" width="360" height="480" rx="22" fill="#fff" stroke="#d7e2f0" stroke-width="4"/>
+      <text x="40" y="96" font-family="Poppins" font-weight="800" font-size="72" fill="#1458a4">℞</text>
+      <rect x="140" y="50" width="200" height="16" rx="8" fill="#dbe5f2"/><rect x="140" y="80" width="150" height="12" rx="6" fill="#e6edf6"/>
+      <path d="M44 160 q30 -18 60 0 t60 0 t60 0 t60 0" fill="none" stroke="#5d6b82" stroke-width="5" stroke-linecap="round"/>
+      <path d="M44 220 q25 -14 50 0 t50 0 t50 0" fill="none" stroke="#5d6b82" stroke-width="5" stroke-linecap="round"/>
+      <path d="M44 280 q30 -18 60 0 t60 0 t60 0 t50 0" fill="none" stroke="#5d6b82" stroke-width="5" stroke-linecap="round"/>
+      <path d="M44 340 q25 -14 50 0 t50 0" fill="none" stroke="#5d6b82" stroke-width="5" stroke-linecap="round"/>
+      <path d="M210 430 q30 -40 50 -5 q20 30 50 -20" fill="none" stroke="#1458a4" stroke-width="5" stroke-linecap="round"/>
+    </svg>
+    <svg id="vf" class="abs el" style="left:610px;top:730px" width="440" height="560" viewBox="0 0 440 560" fill="none" stroke="#2a7edd" stroke-width="10" stroke-linecap="round">
+      <path d="M10 80V10h70M360 10h70v70M430 480v70h-70M80 550H10v-70"/>
+    </svg>
+  </section>
+
+  <!-- ===== 7-9 · steps ===== -->
+  <section class="scene" id="sSteps">
+    <div id="stepHead" class="abs el">অর্ডার করবেন <span class="hl">যেভাবে</span></div>
+    <div id="tracker" class="abs el">
+      <div class="trk" style="left:180px;width:240px"><i id="trk1"></i></div>
+      <div class="trk" style="left:500px;width:240px"><i id="trk2"></i></div>
+      <div class="stp" id="st1"><div class="n"><i class="el"></i><b>১</b></div><div class="t">তথ্য দিন</div></div>
+      <div class="stp" id="st2"><div class="n"><i class="el"></i><b>২</b></div><div class="t">কনফার্মেশন কল</div></div>
+      <div class="stp" id="st3"><div class="n"><i class="el"></i><b>৩</b></div><div class="t">হোম ডেলিভারি</div></div>
+    </div>
+    <!-- step 1: order form (fictional data) -->
+    <div id="form" class="abs card el">
+      <div style="font-size:44px;font-weight:700;display:flex;align-items:center;gap:14px"><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#1458a4" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>ডেলিভারি তথ্য</div>
+      <div class="fl">আপনার নাম</div><div class="fi el" id="fi1"><span id="ft1" data-full="রহিম উদ্দিন"></span></div>
+      <div class="fl">মোবাইল নম্বর</div><div class="fi el" id="fi2"><span id="ft2" data-full="০১৭XX-XXXXXX"></span></div>
+      <div class="fl">সম্পূর্ণ ঠিকানা</div><div class="fi el" id="fi3" style="height:120px"><span id="ft3" data-full="বাড়ি ১২, রোড ৩, শেরপুর সদর"></span></div>
+      <div id="placeBtn" class="el">অর্ডার করুন <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg></div>
+    </div>
+    <div id="tapDot" class="abs el" style="left:500px;top:1400px;width:90px;height:90px;border-radius:50%;background:rgba(42,126,221,.35);border:4px solid #fff"></div>
+    <!-- step 2: confirmation -->
+    <div class="abs chip g el" id="confirmed" style="left:260px;top:1690px;font-size:46px"><div class="ci"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#1fae7a" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg></div>অর্ডার নিশ্চিত</div>
+    <!-- step 3: delivery -->
+    <div id="dlv" class="abs el" style="inset:0">
+      <div id="road" class="abs"><i style="left:40px"></i><i style="left:240px"></i><i style="left:440px"></i><i style="left:640px"></i><i style="left:840px"></i><i style="left:1040px"></i></div>
+      <svg id="house" class="abs" viewBox="0 0 300 460">
+        <rect x="30" y="170" width="240" height="290" rx="8" fill="#fff" stroke="#d7e2f0" stroke-width="4"/>
+        <path d="M10 190 L150 60 L290 190 Z" fill="#1458a4"/>
+        <rect x="110" y="300" width="80" height="160" rx="8" fill="#2a7edd"/>
+        <circle cx="175" cy="385" r="6" fill="#fff"/>
+        <rect x="55" y="220" width="70" height="60" rx="6" fill="#e5f3fe" stroke="#9cc4ee" stroke-width="3"/>
+        <rect x="175" y="220" width="70" height="60" rx="6" fill="#e5f3fe" stroke="#9cc4ee" stroke-width="3"/>
+      </svg>
+      <svg id="pinH" class="abs el" viewBox="0 0 24 30"><path d="M12 29s10-9 10-17A10 10 0 0 0 2 12c0 8 10 17 10 17z" fill="#e5533d"/><circle cx="12" cy="12" r="4" fill="#fff"/></svg>
+      <svg id="rider" class="abs el" viewBox="0 0 420 300"><g id="riderG"></g></svg>
+      <div id="arrived" class="abs chip g el"><div class="ci"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#1fae7a" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg></div>পৌঁছে গেছে!</div>
+      <div class="abs cap t2 el" id="c9" style="top:1560px;font-size:64px">আপনার <span class="hl">ঠিকানায়</span> ওষুধ</div>
+    </div>
+  </section>
+
+  <!-- ===== 10 · relief ===== -->
+  <section class="scene" id="s10">
+    <div class="abs cap t2 el" id="c10a" style="top:150px">তাই আর <span class="hl">দেরি কেন?</span></div>
+    <div class="abs no el" id="c10b" style="left:60px;top:330px;font-size:44px"><div class="ic"><svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="#e5533d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l1.5-5h15L21 9"/><path d="M4 9h16v11H4z"/><path d="M9 20v-6h6v6"/></svg></div>দোকানে দোকানে ঘোরা নয়</div>
+    <div class="abs chip g el" id="c10c" style="left:60px;top:490px;font-size:48px"><div class="ci"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#1fae7a" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg></div>ঘরে বসেই অর্ডার করুন</div>
+    <div class="abs el" id="c10d" style="left:60px;top:650px;display:flex;align-items:center;gap:18px;font-size:44px;font-weight:700"><div class="logo" style="--s:64px"><div class="pl"><div class="l">Medi</div><div class="r">Sh<span class="o"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke="#fff" stroke-width="4" stroke-linecap="round"/></svg></span>p</div></div></div>Sherpur-এর মাধ্যমে</div>
+    <svg class="abs" id="relief" viewBox="0 0 1080 1920" width="1080" height="1920" style="left:0;top:0"><g id="manG2"></g></svg>
+  </section>
+
+  <!-- ===== 11 · slogan ===== -->
+  <section class="scene" id="s11">
+    <div class="abs el" id="sl_logo" style="left:0;right:0;top:560px;display:flex;justify-content:center"><div class="card" style="padding:60px 80px;border-radius:50px"><div class="logo" style="--s:140px"><div class="pl"><div class="l">Medi</div><div class="r">Sh<span class="o"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke="#fff" stroke-width="4" stroke-linecap="round"/></svg></span>p</div></div><div class="sub">SHERPUR</div></div></div></div>
+    <div class="abs cap" style="top:1080px;font-size:96px;font-weight:700;color:#fff;line-height:1.25">
+      <div><span class="m"><span class="w el" id="sl_b">আপনার ওষুধ,</span></span></div>
+      <div><span class="m"><span class="w el" id="sl_c" style="color:#bfe3ff">আপনার ঠিকানায়।</span></span></div>
+    </div>
+  </section>
+
+  <!-- ===== 12 · CTA ===== -->
+  <section class="scene" id="s12">
+    <div class="abs el" id="cta_logo" style="left:0;right:0;top:250px;display:flex;justify-content:center"><div class="logo" style="--s:110px"><div class="pl"><div class="l">Medi</div><div class="r">Sh<span class="o"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke="#fff" stroke-width="4" stroke-linecap="round"/></svg></span>p</div></div><div class="sub">SHERPUR</div></div></div>
+    <div class="abs cap t2 el" id="cta_t" style="top:600px;font-size:92px">আজই <span class="hl">ভিজিট করুন</span></div>
+    <div class="abs cta card el" id="cta_web" style="left:130px;top:830px"><div class="ci" style="background:var(--sky)"><svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#1458a4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 0 20M12 2a15 15 0 0 0 0 20"/></svg></div>আমাদের ওয়েবসাইট</div>
+    <div class="abs el" id="cta_or" style="left:0;right:0;top:1040px;text-align:center;font-size:44px;font-weight:600;color:var(--mute)">অথবা</div>
+    <div class="abs cta el" id="cta_app" style="left:130px;top:1130px;background:linear-gradient(90deg,#1458a4,#2a7edd);color:#fff;box-shadow:0 26px 60px rgba(20,88,164,.35)"><div class="ci" style="background:rgba(255,255,255,.18)"><svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="2.5"/><path d="M11 18h2"/></svg></div>MediShop Sherpur অ্যাপ</div>
+    <div class="abs cap el" id="cta_sl" style="top:1460px;font-size:54px;color:var(--mute);font-weight:600">আপনার ওষুধ, <span class="hl">আপনার ঠিকানায়।</span></div>
+  </section>
+
+  <!-- shared phone -->
+  <div id="phone" class="abs el"><div id="screen"><img id="scr" alt=""><div id="notch"></div>
+    <div id="callUI" class="el"><div class="av"><svg width="54" height="54" viewBox="0 0 24 24" fill="none" stroke="#1458a4" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg></div><div><div class="nm">MediShop Sherpur<br>প্রতিনিধি</div><div class="st" id="callSt">কল করছে…</div></div><div class="acc el" id="callAcc"><svg width="40" height="40" viewBox="0 0 24 24" fill="#fff"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1z"/></svg></div></div>
+  </div></div>
+  <div id="ringA" class="abs" style="left:0;top:0;width:200px;height:200px;margin:-100px 0 0 -100px;border-radius:50%;border:6px solid #22c55e;opacity:0;z-index:6"></div>
+
+  <div id="bar" class="abs el"><div class="logo" style="--s:58px"><div class="pl"><div class="l">Medi</div><div class="r">Sh<span class="o"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke="#fff" stroke-width="4" stroke-linecap="round"/></svg></span>p</div></div></div></div>
+  <div id="flash"></div>
+</div></div>
+
+<script src="timeline.js"></script>
+<script>
+(() => {
+  'use strict';
+  if (!window.TL) throw new Error('timeline.js missing: run python3 timeline.py');
+  const { DURATION, BEAT, ORIGIN, SCENES: S, CLIPS, CLIP_N, CLIP_FPS, CUES: C } = window.TL;
+  const NS = 'http://www.w3.org/2000/svg';
+  const $ = s => document.querySelector(s), $$ = s => Array.from(document.querySelectorAll(s));
+  const clamp = (v, a, b) => Math.min(b, Math.max(a, v)), lerp = (a, b, p) => a + (b - a) * p;
+  const E = {
+    lin: p => p, out: p => 1 - Math.pow(1 - p, 3), out5: p => 1 - Math.pow(1 - p, 5), in: p => p * p * p,
+    inout: p => p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2,
+    back: p => { const c1 = 1.70158, c3 = c1 + 1; return 1 + c3 * Math.pow(p - 1, 3) + c1 * Math.pow(p - 1, 2); },
+    elastic: p => p === 0 || p === 1 ? p : Math.pow(2, -10 * p) * Math.sin((p * 10 - 0.75) * (2 * Math.PI) / 3) + 1,
+  };
+  let seed = 3; const rnd = () => { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; };
+  const mk = (tag, attrs = {}, parent) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; };
+
+  // ---------- characters (flat vector people) ----------
+  // feet at (0,0), ~300 units tall; parts are separate groups so limbs and faces can animate
+  function person(parent, o) {
+    const g = mk('g', {}, parent);
+    const legL = mk('g', {}, g), legR = mk('g', {}, g);
+    [legL, legR].forEach((L, i) => {
+      mk('rect', { x: -11 + (i ? 12 : -12), y: -112, width: 22, height: 106, rx: 10, fill: o.pants }, L);
+      mk('ellipse', { cx: (i ? 12 : -12) + 6, cy: -4, rx: 18, ry: 9, fill: '#2b2f3a' }, L);
+    });
+    const armB = mk('g', {}, g);
+    mk('rect', { x: -9, y: 0, width: 18, height: 100, rx: 9, fill: o.shirt2 || o.shirt }, armB);
+    mk('circle', { cx: 0, cy: 102, r: 10, fill: o.skin }, armB);
+    mk('rect', { x: -40, y: -232, width: 80, height: 128, rx: 30, fill: o.shirt }, g);
+    if (o.badge) { mk('rect', { x: 8, y: -205, width: 22, height: 22, rx: 5, fill: '#fff' }, g); mk('path', { d: 'M19 -201v14M12 -194h14', stroke: '#2a7edd', 'stroke-width': 4, 'stroke-linecap': 'round' }, g); }
+    const armF = mk('g', {}, g);
+    mk('rect', { x: -9, y: 0, width: 18, height: 100, rx: 9, fill: o.shirt2 || o.shirt }, armF);
+    mk('circle', { cx: 0, cy: 102, r: 10, fill: o.skin }, armF);
+    const head = mk('g', {}, g);
+    mk('rect', { x: -9, y: -250, width: 18, height: 24, fill: o.skin }, head);
+    mk('circle', { cx: 0, cy: -282, r: 38, fill: o.skin }, head);
+    mk('path', { d: o.hairD || 'M-38 -286 a38 38 0 0 1 76 0 q-6 -16 -22 -14 q-20 -10 -40 4 q-10 2 -14 10z', fill: o.hair }, head);
+    mk('ellipse', { cx: 34, cy: -282, rx: 6, ry: 9, fill: o.skin }, head);   // ear (facing right)
+    const face = mk('g', {}, head);
+    const eyes = [mk('ellipse', { cx: 8, cy: -284, rx: 4.5, ry: 5.5, fill: '#1b2230' }, face), mk('ellipse', { cx: 26, cy: -284, rx: 4.5, ry: 5.5, fill: '#1b2230' }, face)];
+    const brows = [mk('path', { d: 'M2 -297 h12', stroke: '#1b2230', 'stroke-width': 4, 'stroke-linecap': 'round' }, face), mk('path', { d: 'M20 -297 h12', stroke: '#1b2230', 'stroke-width': 4, 'stroke-linecap': 'round' }, face)];
+    const mouth = mk('path', { d: 'M10 -264 q8 4 16 0', stroke: '#7a2e2e', 'stroke-width': 4, fill: 'none', 'stroke-linecap': 'round' }, face);
+    return { g, legL, legR, armB, armF, head, eyes, brows, mouth, o };
+  }
+  const MOUTH = { smile: 'M8 -266 q10 10 20 0', big: 'M6 -268 q12 16 24 0 z', neutral: 'M10 -264 q8 3 16 0', frown: 'M9 -260 q9 -8 18 0', open: 'M12 -266 q6 8 12 0 q-6 -6 -12 0' };
+  const BROW = {
+    neutral: ['M2 -297 h12', 'M20 -297 h12'], angry: ['M2 -301 l12 6', 'M20 -295 l12 -6'],
+    worried: ['M2 -295 l12 -5', 'M20 -300 l12 5'], up: ['M2 -301 q6 -5 12 0', 'M20 -301 q6 -5 12 0'],
+  };
+  function pose(P, t, s) {
+    // s: {x, y, sc, dir, walk, face, look, wave}
+    const w = s.walk ? Math.sin(t * 2 * Math.PI * 1.7) : 0;
+    const bob = s.walk ? Math.abs(Math.sin(t * 2 * Math.PI * 1.7)) * -6 : Math.sin(t * 2.2 + (P.o.ph || 0)) * 1.5;
+    P.g.setAttribute('transform', `translate(${s.x},${(s.y || 0) + bob}) scale(${(s.sc || 1) * (s.dir || 1)},${s.sc || 1})`);
+    P.legL.setAttribute('transform', `rotate(${w * 24} 0 -110)`);
+    P.legR.setAttribute('transform', `rotate(${-w * 24} 0 -110)`);
+    P.armB.setAttribute('transform', `translate(-28 -222) rotate(${-w * 22 + (s.armB || 8)})`);
+    P.armF.setAttribute('transform', `translate(28 -222) rotate(${w * 22 + (s.armF || -8)})`);
+    P.head.setAttribute('transform', `rotate(${s.tilt || 0} 0 -250)`);
+    const f = s.face || 'neutral';
+    const [m, b] = { neutral: ['neutral', 'neutral'], annoyed: ['frown', 'angry'], worried: ['frown', 'worried'], curious: ['open', 'up'], happy: ['smile', 'up'], joy: ['big', 'up'] }[f];
+    P.mouth.setAttribute('d', MOUTH[m]); P.mouth.setAttribute('fill', m === 'big' ? '#7a2e2e' : 'none');
+    P.brows[0].setAttribute('d', BROW[b][0]); P.brows[1].setAttribute('d', BROW[b][1]);
+    const blink = ((t + (P.o.ph || 0)) % 3.3) < 0.12 ? 0.15 : 1;
+    P.eyes.forEach(e => e.setAttribute('ry', 5.5 * blink));
+  }
+
+  // ---------- pharmacies ----------
+  function pharmacy(g, wall, sign, signTxt, crossCol) {
+    mk('rect', { x: -600, y: 560, width: 2280, height: 960, fill: `url(#${wall})` }, g);
+    mk('rect', { x: -600, y: 1500, width: 2280, height: 600, fill: 'url(#floorG)' }, g);
+    mk('rect', { x: -600, y: 1494, width: 2280, height: 10, fill: '#9aa7b8' }, g);
+    // shelves with boxes
+    for (let r = 0; r < 3; r++) {
+      const y = 760 + r * 150;
+      mk('rect', { x: 470, y: y + 100, width: 600, height: 14, rx: 4, fill: '#b9885c' }, g);
+      for (let i = 0; i < 9; i++) {
+        const h = 50 + rnd() * 45, w = 44 + rnd() * 18;
+        const cols = ['#ef8354', '#4ea5d9', '#7bc67b', '#f6c453', '#d16ba5', '#8c9eff', '#ffffff'];
+        mk('rect', { x: 485 + i * 64, y: y + 100 - h, width: w, height: h, rx: 6, fill: cols[(i + r * 3) % cols.length], stroke: '#00000014', 'stroke-width': 2 }, g);
+      }
+    }
+    // sign
+    mk('rect', { x: 470, y: 600, width: 560, height: 120, rx: 22, fill: sign }, g);
+    mk('rect', { x: 500, y: 620, width: 80, height: 80, rx: 14, fill: '#fff' }, g);
+    mk('path', { d: 'M540 632v56M512 660h56', stroke: crossCol, 'stroke-width': 18, 'stroke-linecap': 'round' }, g);
+    const tx = mk('text', { x: 610, y: 683, 'font-family': 'Hind Siliguri', 'font-weight': 700, 'font-size': 58, fill: '#fff' }, g); tx.textContent = signTxt;
+    // counter + pharmacist
+    const ph = person(g, { shirt: '#ffffff', shirt2: '#f1f5f9', pants: '#3b4a63', skin: '#c98d62', hair: '#2b2118', ph: 1.1 });
+    ph.g.setAttribute('data-pharm', '1');
+    mk('rect', { x: 700, y: 1250, width: 380, height: 250, rx: 16, fill: '#ffffff', stroke: '#d5dde8', 'stroke-width': 4 }, g);
+    mk('rect', { x: 680, y: 1236, width: 420, height: 26, rx: 10, fill: '#8a5a33' }, g);
+    mk('rect', { x: 850, y: 1320, width: 80, height: 80, rx: 14, fill: crossCol }, g);
+    mk('path', { d: 'M890 1334v52M864 1360h52', stroke: '#fff', 'stroke-width': 14, 'stroke-linecap': 'round' }, g);
+    return ph;
+  }
+  const pharmA = pharmacy($('#pharmA'), 'wallA', '#1fae7a', 'ফার্মেসি', '#1fae7a');
+  const pharmB = pharmacy($('#pharmB'), 'wallB', '#d9822b', 'ফার্মেসি', '#d9822b');
+  // wall clock (pharmacy A)
+  const clock = mk('g', { transform: 'translate(170 820)' }, $('#pharmA'));
+  mk('circle', { r: 70, fill: '#fff', stroke: '#3b4a63', 'stroke-width': 8 }, clock);
+  for (let i = 0; i < 12; i++) mk('path', { d: 'M0 -56v10', stroke: '#3b4a63', 'stroke-width': 5, transform: `rotate(${i * 30})` }, clock);
+  const hH = mk('path', { d: 'M0 0v-34', stroke: '#14223a', 'stroke-width': 8, 'stroke-linecap': 'round' }, clock);
+  const hM = mk('path', { d: 'M0 0v-52', stroke: '#e5533d', 'stroke-width': 5, 'stroke-linecap': 'round' }, clock);
+
+  // crowds
+  const CA = [], CB = [];
+  const pal = [['#6c8ebf', '#2f3b52', '#e0ac69', '#2b2118'], ['#c46a6a', '#3b4a63', '#8d5524', '#1b1410'], ['#7fb069', '#2f3b52', '#c68642', '#3a2a1a'],
+               ['#9b72cf', '#40435a', '#f1c27d', '#2b2118'], ['#e3a03e', '#2f3b52', '#a0663d', '#1b1410'], ['#4d9fa8', '#3b4a63', '#e0ac69', '#3a2a1a'],
+               ['#d47fa6', '#2f3b52', '#c68642', '#2b2118'], ['#8a9a5b', '#40435a', '#8d5524', '#1b1410']];
+  [600, 510, 420, 330].forEach((x, i) => { const [s, p, k, h] = pal[i]; CA.push({ P: person($('#crowdA'), { shirt: s, pants: p, skin: k, hair: h, ph: i * 0.7 }), x, y: 1500, sc: 1.05 }); });
+  [[640, 1480, .95], [560, 1500, 1.02], [720, 1505, 1], [470, 1490, .97], [380, 1505, 1.03], [610, 1515, 1.05], [520, 1520, 1.06], [300, 1500, 1]].forEach(([x, y, sc], i) => {
+    const [s, p, k, h] = pal[(i + 2) % pal.length]; CB.push({ P: person($('#crowdB'), { shirt: s, pants: p, skin: k, hair: h, ph: i * 0.9 }), x, y, sc, d: i % 3 === 1 ? -1 : 1 });
+  });
+  const man = person($('#manG'), { shirt: '#3d7dd8', shirt2: '#336cbd', pants: '#2c3446', skin: '#c68642', hair: '#1b1410', ph: 0.3 });
+  const helper = person($('#helperG'), { shirt: '#1fae7a', shirt2: '#1a9a6c', pants: '#2c3446', skin: '#e0ac69', hair: '#2b2118', ph: 2.1, badge: true,
+    hairD: 'M-38 -284 a38 38 0 0 1 76 -4 q-14 -18 -38 -16 q-26 2 -38 20z' });
+  const man2 = person($('#manG2'), { shirt: '#3d7dd8', shirt2: '#336cbd', pants: '#2c3446', skin: '#c68642', hair: '#1b1410', ph: 0.3 });
+  // phone in man2's hand
+  const handPhone = mk('g', {}, $('#manG2'));
+  mk('rect', { x: -20, y: -36, width: 40, height: 70, rx: 8, fill: '#0e1626' }, handPhone);
+  mk('rect', { x: -15, y: -30, width: 30, height: 56, rx: 5, fill: '#2a7edd' }, handPhone);
+  // fx: steam, question marks
+  const steam = [0, 1, 2].map(i => mk('path', { d: 'M0 0 q-10 -14 0 -28 q10 -14 0 -28', stroke: '#e5533d', 'stroke-width': 6, fill: 'none', 'stroke-linecap': 'round', opacity: 0 }, $('#fxG')));
+  const qs = [0, 1, 2].map(i => { const t = mk('text', { 'font-family': 'Poppins', 'font-weight': 800, 'font-size': 70 + i * 14, fill: '#d9822b', opacity: 0 }, $('#fxG')); t.textContent = '?'; return t; });
+  const tapRing = mk('circle', { r: 30, fill: 'none', stroke: '#1fae7a', 'stroke-width': 6, opacity: 0 }, $('#fxG'));
+
+  // rider (scene 9)
+  (() => {
+    const g = $('#riderG');
+    const wheel = (cx) => { const w = mk('g', { transform: `translate(${cx} 250)` }, g); mk('circle', { r: 44, fill: '#2b2f3a' }, w); mk('circle', { r: 20, fill: '#c9d3df' }, w); for (let i = 0; i < 4; i++) mk('path', { d: 'M0 -20v40', stroke: '#2b2f3a', 'stroke-width': 4, transform: `rotate(${i * 45})` }, w); return w; };
+    window.__wheels = [wheel(90), wheel(320)];
+    mk('path', { d: 'M90 250 L170 170 L290 170 L320 250', stroke: '#1458a4', 'stroke-width': 14, fill: 'none', 'stroke-linejoin': 'round' }, g);
+    mk('path', { d: 'M150 150 h150 q20 0 20 20 v30 h-190z', fill: '#2a7edd' }, g);
+    mk('rect', { x: 20, y: 70, width: 120, height: 100, rx: 12, fill: '#fff', stroke: '#1458a4', 'stroke-width': 6 }, g);
+    mk('path', { d: 'M80 92v56M52 120h56', stroke: '#1fae7a', 'stroke-width': 12, 'stroke-linecap': 'round' }, g);
+    mk('rect', { x: 200, y: 70, width: 60, height: 90, rx: 22, fill: '#1fae7a' }, g);
+    mk('circle', { cx: 232, cy: 44, r: 30, fill: '#e0ac69' }, g);
+    mk('path', { d: 'M200 40 a32 32 0 0 1 64 0 v6 h-64z', fill: '#e5533d' }, g);
+    mk('path', { d: 'M250 100 L320 130', stroke: '#1fae7a', 'stroke-width': 16, 'stroke-linecap': 'round' }, g);
+    mk('path', { d: 'M310 120 l20 -30', stroke: '#2b2f3a', 'stroke-width': 8, 'stroke-linecap': 'round' }, g);
+  })();
+
+  // brand burst: rings + confetti (plus signs and capsules)
+  const rings = [0, 1, 2].map(i => { const d = document.createElement('div'); d.className = 'ring'; $('#rings').appendChild(d); return d; });
+  const conf = [];
+  for (let i = 0; i < 26; i++) {
+    const d = document.createElement('div'); d.className = 'conf';
+    const plus = i % 3 !== 0;
+    d.innerHTML = plus ? `<svg width="40" height="40" viewBox="0 0 24 24"><path d="M12 4v16M4 12h16" stroke="${i % 2 ? '#bfe3ff' : '#7ff0c0'}" stroke-width="5" stroke-linecap="round"/></svg>`
+      : `<svg width="64" height="30" viewBox="0 0 64 30"><rect x="2" y="2" width="60" height="26" rx="13" fill="#fff"/><rect x="32" y="2" width="30" height="26" rx="13" fill="#7ff0c0"/></svg>`;
+    $('#confetti').appendChild(d);
+    const a = (i / 26) * Math.PI * 2 + rnd() * 0.3;
+    conf.push({ el: d, a, dist: 330 + rnd() * 260, rot: rnd() * 720 - 360 });
+  }
+
+  // ---------- tween engine ----------
+  const tracks = new Map();
+  function tw(sel, t0, dur, props, ease = 'out', stagger = 0) {
+    const els = typeof sel === 'string' ? $$(sel) : (Array.isArray(sel) ? sel : [sel]);
+    if (!els.length) throw new Error('Timeline selector matched nothing: ' + sel);
+    els.forEach((el, i) => { const s = t0 + i * stagger; if (!tracks.has(el)) tracks.set(el, []); tracks.get(el).push({ t0: s, t1: s + dur, props, ease: E[ease] || E.out }); });
+  }
+  const TF = ['x', 'y', 's', 'sx', 'r'], DEF = { x: 0, y: 0, s: 1, sx: 1, r: 0 };
+  function apply(el, v) {
+    if ('o' in v) el.style.opacity = v.o;
+    if (TF.some(k => k in v)) { for (const k of TF) if (!(k in v)) v[k] = DEF[k]; el.style.transform = `translate(${v.x}px,${v.y}px) scale(${v.s * v.sx},${v.s}) rotate(${v.r}deg)`; }
+    if ('blur' in v) el.style.filter = v.blur > 0.05 ? `blur(${v.blur}px)` : 'none';
+    if ('clip' in v) el.style.clipPath = `circle(${v.clip}% at ${el.dataset.cx || '540px'} ${el.dataset.cy || '700px'})`;
+    if ('type' in v) { const g = Array.from(el.dataset.full || ''); el.textContent = g.slice(0, Math.round(v.type * g.length)).join(''); }
+  }
+  function renderTracks(t) {
+    for (const [el, list] of tracks) {
+      const v = {};
+      for (const tr of list) for (const k in tr.props) {
+        const [a, b] = tr.props[k];
+        if (t >= tr.t0) { const p = tr.t1 > tr.t0 ? clamp((t - tr.t0) / (tr.t1 - tr.t0), 0, 1) : 1; v[k] = lerp(a, b, tr.ease(p)); }
+        else if (!(k in v)) v[k] = a;
+      }
+      apply(el, v);
+    }
+  }
+  const zero = sel => tw(sel, 0, 0.001, { o: [0, 0] });
+  const pop = { s: [0.5, 1], o: [0, 1] }, up = { y: [70, 0], o: [0, 1] };
+
+  // ---------- scene windows ----------
+  const win = (id, a, b, inn = 0.4, out = 0.3) => { tw(id, a, inn, { o: [0, 1] }, 'out'); if (b < DURATION) tw(id, b - out, out, { o: [1, 0] }, 'in'); };
+  tw('#sStreet', 0, 0.001, { o: [1, 1] }); tw('#sStreet', S.s3[1] + 0.25, 0.25, { o: [1, 0] });
+  $('#s4').dataset.cx = '540px'; $('#s4').dataset.cy = '330px';
+  tw('#s4', S.s4[0] - 0.2, 0.6, { clip: [0, 150] }, 'inout'); tw('#s4', S.s4[1] - 0.3, 0.3, { o: [1, 0] }, 'in');
+  win('#s5', S.s5[0], S.s5[1]); win('#s6', S.s6[0], S.s6[1]); win('#sSteps', S.s7[0], S.s9[1]);
+  win('#s10', S.s10[0], S.s10[1]); win('#s11', S.s11[0], S.s11[1], 0.35); win('#s12', S.s12[0], DURATION);
+
+  // 1 · pharmacy A
+  tw('#c1a', C.s1_cap[0], 0.5, up, 'out5'); tw('#c1b', C.s1_cap[1], 0.5, up, 'out5');
+  tw(['#c1a', '#c1b'].map($), S.s1[1] - 0.35, 0.3, { o: [1, 0], y: [0, -40] }, 'in');
+  // 2 · pharmacy B
+  tw('#pharmB', S.s2[0] - 0.15, 0.3, { o: [0, 1] }); tw('#crowdB', S.s2[0] - 0.15, 0.3, { o: [0, 1] });
+  tw('#pharmA', S.s2[0] - 0.15, 0.3, { o: [1, 0] }); tw('#crowdA', S.s2[0] - 0.15, 0.3, { o: [1, 0] });
+  tw('#c2a', C.s2_cap[0], 0.5, up, 'out5'); tw('#c2b', C.s2_cap[0] + 0.3, 0.5, { s: [1.4, 1], o: [0, 1] }, 'out5');
+  tw('#c2c', C.s2_cap[1], 0.5, up, 'out5');
+  tw(['#c2a', '#c2b', '#c2c'].map($), S.s2[1] - 0.3, 0.3, { o: [1, 0], y: [0, -40] }, 'in');
+  // 3 · helper (camera pushes in, crowd fades back)
+  tw('#street', S.s3[0], 0.9, { s: [1, 1.22], x: [0, 250], y: [0, 40] }, 'inout');
+  tw('#shade', S.s3[0], 0.9, { o: [0, 0.35] }, 'out');
+  tw('#bub', C.s3_bhai - 0.12, 0.5, { s: [0.6, 1], o: [0, 1], y: [40, 0] }, 'back');
+  tw('#bw1', C.s3_bhai - 0.1, 0.4, up, 'out5'); tw('#bw2', C.s3_worried - 0.05, 0.4, up, 'out5'); tw('#bw3', C.s3_worried + 1.0, 0.45, up, 'out5');
+  tw('#no1', C.s3_noqueue[0], 0.5, { x: [-80, 0], o: [0, 1] }, 'back'); tw('#no2', C.s3_noqueue[1], 0.5, { x: [-80, 0], o: [0, 1] }, 'back');
+  // 4 · brand
+  tw('#l4a', C.s4_intro[0], 0.55, up, 'out5'); tw('#l4b', C.s4_intro[1], 0.55, up, 'out5'); tw('#l4c', C.s4_intro[2], 0.55, up, 'out5');
+  tw('#logoCard', C.s4_logo - 0.05, 0.6, { s: [0.2, 1], o: [0, 1], r: [-8, 0] }, 'back');
+  tw('#pin', C.s4_logo + 0.45, 0.5, { y: [40, 0], o: [0, 1] }, 'back');
+  zero('#flash'); tw('#flash', C.s4_logo, 0.5, { o: [0.55, 0] }, 'out');
+  // 5 · app — the shared phone rises in
+  zero('#phone');
+  tw('#phone', S.s5[0] - 0.05, 0.7, { y: [500, 0], o: [0, 1], r: [6, 0] }, 'out5');
+  tw('#c5', S.s5[0] + 0.15, 0.5, up, 'out5');
+  [['#ch_app', C.s5_app, -1], ['#ch_web', C.s5_web, 1], ['#ch_find', C.s5_find, -1], ['#ch_order', C.s5_order, 1]].forEach(([id, t, sd]) =>
+    tw(id, t, 0.5, { x: [sd * 120, 0], s: [0.7, 1], o: [0, 1] }, 'back'));
+  // 6 · prescription: phone slides left
+  tw('#phone', S.s6[0] - 0.1, 0.6, { x: [0, -200], s: [1, 0.86] }, 'inout');
+  tw('#c6a', S.s6[0] + 0.1, 0.4, up, 'out5'); tw('#c6b', C.s6_rx - 0.1, 0.5, up, 'out5');
+  tw('#rxp', C.s6_rx, 0.5, { y: [60, 0], r: [10, -4], o: [0, 1] }, 'back');
+  tw('#vf', C.s6_rx + 0.3, 0.4, { s: [1.3, 1], o: [0, 1] }, 'out');
+  tw('#rxp', C.s6_snap + 0.35, 0.55, { x: [0, -390], y: [0, -40], s: [1, 0.2], r: [-4, -20], o: [1, 0] }, 'in');
+  tw('#vf', C.s6_snap + 0.35, 0.3, { o: [1, 0] });
+  tw('#flash', C.s6_snap, 0.35, { o: [0.8, 0] }, 'out');
+  tw('#phone', S.s6[1] - 0.3, 0.35, { y: [0, 600], o: [1, 0] }, 'in');
+  // 7 · step 1: form (fictional data)
+  tw('#stepHead', S.s7[0] + 0.1, 0.5, up, 'out5'); tw('#tracker', S.s7[0] + 0.2, 0.5, up, 'out5');
+  tw('#st1 .n i', S.s7[0] + 0.4, 0.4, { o: [0, 1], s: [0.4, 1] }, 'back');
+  tw('#form', S.s7[0] + 0.3, 0.6, { y: [80, 0], o: [0, 1] }, 'out5');
+  tw('#ft1', C.s7_name, 0.6, { type: [0, 1] }, 'lin'); tw('#ft2', C.s7_phone + 0.1, 0.7, { type: [0, 1] }, 'lin'); tw('#ft3', C.s7_addr + 0.1, 0.9, { type: [0, 1] }, 'lin');
+  zero('#tapDot'); tw('#tapDot', S.s7[1] - 0.75, 0.15, { o: [0, 1], s: [1.4, 1] }); tw('#tapDot', S.s7[1] - 0.45, 0.25, { o: [1, 0], s: [1, 1.6] });
+  tw('#placeBtn', S.s7[1] - 0.72, 0.1, { s: [1, 0.95] }); tw('#placeBtn', S.s7[1] - 0.62, 0.3, { s: [0.95, 1] }, 'back');
+  tw('#form', S.s7[1] - 0.3, 0.3, { o: [1, 0], y: [0, -60] }, 'in');
+  // 8 · step 2: the phone returns with "Order placed", the call comes in
+  tw('#trk1', S.s8[0], 0.5, { sx: [0, 1] }, 'out'); tw('#st2 .n i', S.s8[0] + 0.3, 0.4, { o: [0, 1], s: [0.4, 1] }, 'back');
+  tw('#phone', S.s8[0] - 0.05, 0.6, { y: [600, 60], x: [-200, 0], s: [0.86, 0.86], o: [0, 1], r: [0, 0] }, 'out5');
+  zero('#callUI'); tw('#callUI', C.s8_call, 0.5, { y: [-200, 0], o: [0, 1] }, 'out5');
+  tw('#callAcc', C.s8_confirm - 0.5, 0.12, { s: [1, 0.85] }); tw('#callAcc', C.s8_confirm - 0.38, 0.3, { s: [0.85, 1] }, 'back');
+  zero('#confirmed'); tw('#confirmed', C.s8_confirm, 0.5, { s: [0.5, 1], o: [0, 1] }, 'back');
+  tw('#phone', S.s8[1] - 0.3, 0.35, { y: [60, 700], o: [1, 0] }, 'in'); tw('#confirmed', S.s8[1] - 0.3, 0.3, { o: [1, 0] }, 'in');
+  // 9 · step 3: delivery
+  tw('#trk2', S.s9[0], 0.5, { sx: [0, 1] }, 'out'); tw('#st3 .n i', S.s9[0] + 0.3, 0.4, { o: [0, 1], s: [0.4, 1] }, 'back');
+  zero('#dlv'); tw('#dlv', S.s9[0], 0.35, { o: [0, 1] });
+  tw('#rider', C.s9_ride[0], C.s9_ride[1], { x: [-440, 380] }, 'inout');
+  tw('#pinH', S.s9[0] + 0.3, 0.6, { y: [-120, 0], o: [0, 1] }, 'elastic');
+  zero('#arrived'); tw('#arrived', C.s9_arrive + 0.2, 0.5, { s: [0.5, 1], o: [0, 1] }, 'back');
+  tw('#c9', S.s9[0] + 0.4, 0.5, up, 'out5');
+  // 10 · relief
+  tw('#c10a', C.s10_why - 0.05, 0.5, up, 'out5');
+  tw('#c10b', C.s10_noshops, 0.5, { x: [-80, 0], o: [0, 1] }, 'back');
+  tw('#c10c', C.s10_home, 0.5, { x: [-80, 0], o: [0, 1] }, 'back');
+  tw('#c10d', C.s10_brand, 0.5, { x: [-80, 0], o: [0, 1] }, 'back');
+  tw('#phone', S.s10[0] + 0.25, 0.7, { x: [300, 180], y: [800, 260], s: [0.7, 0.7], o: [0, 1], r: [10, 4] }, 'out5');
+  tw('#phone', S.s10[1] - 0.3, 0.3, { o: [1, 0] }, 'in');
+  // 11 · slogan
+  tw('#sl_logo', C.s11_a - 0.05, 0.6, { s: [0.4, 1], o: [0, 1] }, 'back');
+  tw('#sl_b', C.s11_b - 0.05, 0.55, up, 'out5'); tw('#sl_c', C.s11_c - 0.05, 0.55, up, 'out5');
+  tw('#flash', C.s11_a - 0.02, 0.45, { o: [0.4, 0] }, 'out');
+  // 12 · CTA
+  tw('#cta_logo', S.s12[0] + 0.1, 0.5, { y: [-40, 0], o: [0, 1] }, 'out5');
+  tw('#cta_t', C.s12_a - 0.05, 0.5, up, 'out5');
+  tw('#cta_web', C.s12_web - 0.1, 0.55, { s: [0.6, 1], o: [0, 1] }, 'back');
+  tw('#cta_or', C.s12_app - 0.6, 0.4, { o: [0, 1] });
+  tw('#cta_app', C.s12_app - 0.1, 0.55, { s: [0.6, 1], o: [0, 1] }, 'back');
+  tw('#cta_sl', C.s12_app + 1.4, 0.6, up, 'out5');
+  // persistent mini logo bar (after the brand reveal, not on brand/slogan/CTA scenes)
+  zero('#bar'); tw('#bar', S.s5[0] + 0.3, 0.4, { o: [0, 1] }); tw('#bar', S.s10[1] - 0.3, 0.3, { o: [1, 0] });
+
+  // ---------- continuous (pure functions of t) ----------
+  const seg = (t, a, d) => clamp((t - a) / d, 0, 1);
+  const scr = $('#scr'); let curSrc = '';
+  function clipFrame(t) {
+    if (t < S.s5[0] - 0.1 || t > S.s10[1]) return null;
+    let key = null;
+    for (const k in CLIPS) if (t >= CLIPS[k].at - 0.001 && (!key || CLIPS[k].at > CLIPS[key].at)) key = k;
+    if (!key) key = 'home';
+    const c = CLIPS[key];
+    const f = clamp(Math.floor(Math.max(0, t - c.at) * c.speed * CLIP_FPS), 0, CLIP_N[key] - 1);
+    return `clips/${key}/${String(f + 1).padStart(4, '0')}.jpg`;
+  }
+  function manState(t) {
+    // pharmacy A: walk in, wait, turn, walk out
+    if (t < S.s1[1]) {
+      const [wi, wd] = C.s1_walk_in, [wo, wod] = C.s1_walk_out;
+      if (t < wi + wd) return { x: lerp(-140, 200, E.inout(seg(t, wi, wd))), dir: 1, walk: t > wi && t < wi + wd, face: 'neutral' };
+      if (t < wo) return { x: 200, dir: 1, face: t > C.s1_annoy ? 'annoyed' : 'neutral', tilt: t > C.s1_annoy ? -4 : 0 };
+      return { x: lerp(200, -160, E.in(seg(t, wo, wod))), dir: -1, walk: true, face: 'annoyed' };
+    }
+    if (t < S.s3[0] + 0.2) {
+      const [wi, wd] = C.s2_walk_in;
+      if (t < wi + wd) return { x: lerp(-160, 220, E.out(seg(t, wi, wd))), dir: 1, walk: true, face: 'worried' };
+      const [lk, ld] = C.s2_look; const k = Math.floor(seg(t, lk, ld) * 4);
+      return { x: 220, dir: (t > lk && k % 2 === 0) ? -1 : 1, face: 'worried', tilt: t > lk ? (k % 2 ? 6 : -6) : 0 };
+    }
+    // scene 3: turns to the helper, frown -> curious -> happy
+    const f = t < C.s3_worried + 1.2 ? 'worried' : (t < C.s3_noqueue[1] ? 'curious' : 'happy');
+    return { x: 220, dir: t > C.s3_bhai - 0.1 ? -1 : 1, face: f };
+  }
+  function fx(t) {
+    // street characters
+    if (t < S.s3[1] + 0.6) {
+      pose(man, t, { ...manState(t), y: 1500, sc: 1.15 });
+      const [hi, hd] = C.s3_helper_in;
+      const hx = t < hi ? -200 : lerp(-200, 30, E.out(seg(t, hi, hd)));
+      const talk = t > C.s3_bhai && t < S.s3[1] && Math.sin(t * 18) > 0;
+      pose(helper, t, { x: hx, y: 1500, sc: 1.15, dir: 1, walk: t > hi && t < hi + hd, face: t > hi + hd ? 'happy' : 'neutral', armF: t > hi + hd - 0.2 && t < C.s3_bhai + 0.6 ? -70 : -8 });
+      if (talk) helper.mouth.setAttribute('d', MOUTH.open);
+      CA.forEach((c, i) => pose(c.P, t, { x: c.x, y: c.y, sc: c.sc, dir: 1, face: i === 3 ? 'annoyed' : 'neutral' }));
+      CB.forEach((c, i) => pose(c.P, t, { x: c.x + Math.sin(t * 1.3 + i) * 6, y: c.y, sc: c.sc, dir: c.d, face: i % 2 ? 'worried' : 'neutral', tilt: Math.sin(t + i) * 3 }));
+      pose(pharmA, t, { x: 900, y: 1500, sc: 1.05, dir: -1, face: 'neutral', armF: -40 });
+      pose(pharmB, t, { x: 900, y: 1500, sc: 1.05, dir: -1, face: 'neutral', armF: -40 });
+      // clock spins while he waits
+      const w = seg(t, C.s1_wait[0], C.s1_wait[1]);
+      hM.setAttribute('transform', `rotate(${w * 720 + 60})`); hH.setAttribute('transform', `rotate(${w * 60 + 150})`);
+      // steam when annoyed
+      steam.forEach((s, i) => {
+        const p = ((t - C.s1_annoy) * 1.4 + i / 3) % 1;
+        const on = t > C.s1_annoy && t < C.s1_walk_out[0] + 0.4;
+        s.setAttribute('opacity', on ? (1 - p) * 0.9 : 0);
+        s.setAttribute('transform', `translate(${200 - 40 + i * 40},${1500 - 400 - p * 60})`);
+      });
+      // question marks
+      qs.forEach((q, i) => {
+        const a = C.s2_q + i * 0.25, on = t > a && t < S.s3[0];
+        const p = seg(t, a, 0.4);
+        q.setAttribute('opacity', on ? E.out(p) : 0);
+        q.setAttribute('x', 150 + i * 70); q.setAttribute('y', 1500 - 390 - i * 30 - E.back(p) * 20 + Math.sin(t * 3 + i) * 6);
+      });
+      // shoulder tap ring
+      const tp = seg(t, C.s3_bhai - 0.3, 0.5);
+      tapRing.setAttribute('opacity', tp > 0 && tp < 1 ? 1 - tp : 0);
+      tapRing.setAttribute('cx', 205); tapRing.setAttribute('cy', 1500 - 250); tapRing.setAttribute('r', 20 + tp * 60);
+    }
+    // brand burst
+    const bp = seg(t, C.s4_logo, 1.1);
+    rings.forEach((r, i) => {
+      const p = seg(t, C.s4_logo + i * 0.12, 0.9), sz = 300 + p * 900;
+      r.style.opacity = p > 0 && p < 1 ? (1 - p) * 0.8 : 0;
+      r.style.cssText += `;left:${540 - sz / 2}px;top:${1090 - sz / 2}px;width:${sz}px;height:${sz}px`;
+    });
+    conf.forEach(c => {
+      const p = E.out(bp), on = bp > 0 && t < S.s4[1];
+      c.el.style.opacity = on ? Math.min(1, (1 - bp) * 3 + 0.25) : 0;
+      c.el.style.transform = `translate(${540 + Math.cos(c.a) * c.dist * p - 20}px,${1090 + Math.sin(c.a) * c.dist * p + bp * bp * 120 - 20}px) rotate(${c.rot * p}deg)`;
+    });
+    // incoming call: ring pulses until accepted
+    const ring = $('#ringA');
+    if (t > C.s8_call + 0.3 && t < C.s8_confirm - 0.4) {
+      const ph = ((t - C.s8_call) % 0.8) / 0.8;
+      ring.style.opacity = (1 - ph) * 0.9; ring.style.transform = `translate(${540 + 190}px,${530 + 160}px) scale(${0.5 + ph})`;
+    } else ring.style.opacity = 0;
+    $('#callSt').textContent = t > C.s8_confirm - 0.4 ? 'কল চলছে · ০০:' + String(Math.max(0, Math.floor((t - C.s8_confirm + 0.4) * 3))).padStart(2, '0').replace(/\d/g, d => '০১২৩৪৫৬৭৮৯'[d]) : 'কল করছে…';
+    // delivery wheels + road scroll
+    if (window.__wheels) window.__wheels.forEach(w => { const m = w.getAttribute('transform').split(' rotate')[0]; w.setAttribute('transform', `${m} rotate(${t * 720})`); });
+    $$('#road i').forEach((r, i) => { r.style.transform = `translateX(${-((t * 260) % 200)}px)`; });
+    $('#pinH').style.translate = `0px ${Math.sin(t * 5) * 8}px`;
+    // relief: man smiling with his phone
+    if (t > S.s10[0] - 0.5 && t < S.s10[1] + 0.3) {
+      pose(man2, t, { x: 300, y: 1620, sc: 1.55, dir: 1, face: t > C.s10_why + 0.6 ? 'joy' : 'happy', armF: -120, tilt: Math.sin(t * 1.5) * 2 });
+      handPhone.setAttribute('transform', `translate(${300 + 150},${1620 - 1.55 * 300})`);
+    }
+    // form field focus
+    ['#fi1', '#fi2', '#fi3'].forEach((id, i) => {
+      const a = [C.s7_name, C.s7_phone, C.s7_addr][i], b = [C.s7_phone, C.s7_addr, S.s7[1]][i];
+      $(id).classList.toggle('on', t >= a && t < b);
+    });
+    // CTA app button pulse
+    const sp = t - (C.s12_app + 0.5);
+    $('#cta_app').style.translate = sp > 0 ? `0px 0px` : '';
+    if (sp > 0) $('#cta_app').style.scale = String(1 + Math.max(0, Math.sin(((t - ORIGIN) / BEAT) * Math.PI)) * 0.025);
+  }
+
+  async function render(t) {
+    t = clamp(t, 0, DURATION);
+    renderTracks(t); fx(t);
+    const src = clipFrame(t);
+    if (src && src !== curSrc) { curSrc = src; scr.src = src; try { await scr.decode(); } catch (e) { /* missing frame: keep last */ } }
+  }
+  window.AD = { render, DURATION };
+
+  const params = new URLSearchParams(location.search), wrap = $('#wrap');
+  const fit = () => { wrap.style.transform = `scale(${params.has('capture') ? 1 : Math.min(innerWidth / 1080, innerHeight / 1920)})`; };
+  addEventListener('resize', fit); fit();
+  render(0);
+  if (!params.has('capture')) document.fonts.ready.then(() => {
+    const start = performance.now();
+    const loop = async now => { await render(((now - start) / 1000) % (DURATION + 1)); requestAnimationFrame(loop); };
+    requestAnimationFrame(loop);
+  });
+})();
+</script>
+</body>
+</html>
