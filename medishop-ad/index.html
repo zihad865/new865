@@ -207,7 +207,7 @@ svg .el{transform-box:fill-box;transform-origin:center}
     </div>
     <div id="tapDot" class="abs el" style="left:500px;top:1400px;width:90px;height:90px;border-radius:50%;background:rgba(42,126,221,.35);border:4px solid #fff"></div>
     <!-- step 2: confirmation -->
-    <div class="abs chip g el" id="confirmed" style="left:260px;top:1690px;font-size:46px"><div class="ci"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#1fae7a" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg></div>অর্ডার নিশ্চিত</div>
+    <div class="abs chip g el" id="confirmed" style="left:290px;top:1600px;font-size:46px"><div class="ci"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#1fae7a" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg></div>অর্ডার নিশ্চিত</div>
     <!-- step 3: delivery -->
     <div id="dlv" class="abs el" style="inset:0">
       <div id="road" class="abs"><i style="left:40px"></i><i style="left:240px"></i><i style="left:440px"></i><i style="left:640px"></i><i style="left:840px"></i><i style="left:1040px"></i></div>
@@ -463,8 +463,9 @@ svg .el{transform-box:fill-box;transform-origin:center}
   tw('#c1a', C.s1_cap[0], 0.5, up, 'out5'); tw('#c1b', C.s1_cap[1], 0.5, up, 'out5');
   tw(['#c1a', '#c1b'].map($), S.s1[1] - 0.35, 0.3, { o: [1, 0], y: [0, -40] }, 'in');
   // 2 · pharmacy B
-  tw('#pharmB', S.s2[0] - 0.15, 0.3, { o: [0, 1] }); tw('#crowdB', S.s2[0] - 0.15, 0.3, { o: [0, 1] });
-  tw('#pharmA', S.s2[0] - 0.15, 0.3, { o: [1, 0] }); tw('#crowdA', S.s2[0] - 0.15, 0.3, { o: [1, 0] });
+  // dip through the background: pharmacy A clears before pharmacy B builds in (no double exposure)
+  tw('#pharmA', S.s2[0] - 0.4, 0.25, { o: [1, 0] }, 'in'); tw('#crowdA', S.s2[0] - 0.4, 0.25, { o: [1, 0] }, 'in');
+  tw('#pharmB', S.s2[0] - 0.1, 0.35, { o: [0, 1] }); tw('#crowdB', S.s2[0] + 0.05, 0.35, { o: [0, 1] });
   tw('#c2a', C.s2_cap[0], 0.5, up, 'out5'); tw('#c2b', C.s2_cap[0] + 0.3, 0.5, { s: [1.4, 1], o: [0, 1] }, 'out5');
   tw('#c2c', C.s2_cap[1], 0.5, up, 'out5');
   tw(['#c2a', '#c2b', '#c2c'].map($), S.s2[1] - 0.3, 0.3, { o: [1, 0], y: [0, -40] }, 'in');
@@ -504,11 +505,11 @@ svg .el{transform-box:fill-box;transform-origin:center}
   tw('#form', S.s7[1] - 0.3, 0.3, { o: [1, 0], y: [0, -60] }, 'in');
   // 8 · step 2: the phone returns with "Order placed", the call comes in
   tw('#trk1', S.s8[0], 0.5, { sx: [0, 1] }, 'out'); tw('#st2 .n i', S.s8[0] + 0.3, 0.4, { o: [0, 1], s: [0.4, 1] }, 'back');
-  tw('#phone', S.s8[0] - 0.05, 0.6, { y: [600, 60], x: [-200, 0], s: [0.86, 0.86], o: [0, 1], r: [0, 0] }, 'out5');
+  tw('#phone', S.s8[0] - 0.05, 0.6, { y: [600, 0], x: [-200, 0], s: [0.86, 0.86], o: [0, 1], r: [0, 0] }, 'out5');
   zero('#callUI'); tw('#callUI', C.s8_call, 0.5, { y: [-200, 0], o: [0, 1] }, 'out5');
   tw('#callAcc', C.s8_confirm - 0.5, 0.12, { s: [1, 0.85] }); tw('#callAcc', C.s8_confirm - 0.38, 0.3, { s: [0.85, 1] }, 'back');
   zero('#confirmed'); tw('#confirmed', C.s8_confirm, 0.5, { s: [0.5, 1], o: [0, 1] }, 'back');
-  tw('#phone', S.s8[1] - 0.3, 0.35, { y: [60, 700], o: [1, 0] }, 'in'); tw('#confirmed', S.s8[1] - 0.3, 0.3, { o: [1, 0] }, 'in');
+  tw('#phone', S.s8[1] - 0.3, 0.35, { y: [0, 700], o: [1, 0] }, 'in'); tw('#confirmed', S.s8[1] - 0.3, 0.3, { o: [1, 0] }, 'in');
   // 9 · step 3: delivery
   tw('#trk2', S.s9[0], 0.5, { sx: [0, 1] }, 'out'); tw('#st3 .n i', S.s9[0] + 0.3, 0.4, { o: [0, 1], s: [0.4, 1] }, 'back');
   zero('#dlv'); tw('#dlv', S.s9[0], 0.35, { o: [0, 1] });
